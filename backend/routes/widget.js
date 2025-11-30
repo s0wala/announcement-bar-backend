@@ -1,0 +1,473 @@
+const express = require('express');
+const db = require('../config/database');
+
+const router = express.Router();
+
+// GET /widget/:barId.js - Serves the widget JavaScript
+router.get('/:barId.js', async (req, res) => {
+    try {
+        const { barId } = req.params;
+
+        // Get bar and its messages
+        const barResult = await db.query(
+            `SELECT b.*, u.plan, u.subscription_status 
+             FROM announcement_bars b
+             JOIN users u ON b.user_id = u.id
+             WHERE b.id = $1 AND b.is_active = true`,
+            [barId]
+        );
+
+        if (barResult.rows.length === 0) {
+            return res.status(404).send('// Bar not found or inactive');
+        }
+
+        const bar = barResult.rows[0];
+
+        // Check subscription status (except for free plan during trial)
+        if (bar.plan !== 'free' && bar.subscription_status !== 'active') {
+            return res.status(403).send('// Subscription inactive');
+        }
+
+        // Get messages
+        const messagesResult = await db.query(
+            `SELECT * FROM messages 
+             WHERE bar_id = $1 
+             AND (start_date IS NULL OR start_date <= NOW())
+             AND (end_date IS NULL OR end_date >= NOW())
+             ORDER BY display_order ASC`,
+            [barId]
+        );
+
+        if (messagesResult.rows.length === 0) {
+            return res.send('// No active messages');
+        }
+
+        const messages = messagesResult.rows;
+
+        // Get nav links
+        const navLinksResult = await db.query(
+            'SELECT * FROM nav_links WHERE bar_id = $1 ORDER BY display_order ASC',
+            [barId]
+        );
+        const navLinks = navLinksResult.rows;
+
+        // Generate the widget JavaScript
+        const widgetJs = generateWidgetJs(bar, messages, navLinks);
+
+        res.setHeader('Content-Type', 'application/javascript');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET');
+        res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minutes cache
+        res.send(widgetJs);
+    } catch (error) {
+        console.error('Widget error:', error);
+        res.status(500).send('// Widget error');
+    }
+});
+
+// Generate the widget JavaScript code
+function generateWidgetJs(bar, messages, navLinks) {
+    return `
+(function() {
+    'use strict';
+    
+    var barConfig = ${JSON.stringify(bar)};
+    var messages = ${JSON.stringify(messages)};
+    var navLinks = ${JSON.stringify(navLinks)};
+    var currentMessageIndex = 0;
+    var rotationInterval = null;
+    var countdownInterval = null;
+    var barId = '${bar.id}';
+    var sessionId = generateSessionId();
+    
+    // Generate unique session ID
+    function generateSessionId() {
+        return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+    
+    // Check if bar should be shown based on device
+    function shouldShowOnDevice() {
+        var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        var currentMessage = messages[currentMessageIndex];
+        
+        if (currentMessage.mobile_only && !isMobile) return false;
+        if (currentMessage.desktop_only && isMobile) return false;
+        
+        return true;
+    }
+    
+    // Check if bar should be shown on current page
+    function shouldShowOnPage() {
+        var currentMessage = messages[currentMessageIndex];
+        
+        if (!currentMessage.page_targeting_enabled) return true;
+        
+        var currentPath = window.location.pathname;
+        var targetType = currentMessage.page_targeting_type;
+        
+        switch(targetType) {
+            case 'homepage':
+                return currentPath === '/' || currentPath === '';
+            case 'collection':
+                return currentPath.includes('/collections/');
+            case 'product':
+                return currentPath.includes('/products/');
+            case 'cart':
+                return currentPath.includes('/cart');
+            case 'checkout':
+                return currentPath.includes('/checkout');
+            case 'custom':
+                return currentPath.includes(currentMessage.target_url);
+            default:
+                return true;
+        }
+    }
+    
+    // Track analytics event
+    function trackEvent(eventType, variant) {
+        if (!window.fetch) return;
+        
+        var data = {
+            bar_id: barId,
+            message_id: messages[currentMessageIndex].id,
+            event_type: eventType,
+            variant: variant || 'A',
+            device_type: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+            page_url: window.location.href,
+            referrer: document.referrer,
+            session_id: sessionId
+        };
+        
+        fetch('/api/analytics/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).catch(function() {});
+    }
+    
+    // Create and inject styles
+    function injectStyles() {
+        var style = document.createElement('style');
+        var currentMessage = messages[currentMessageIndex];
+        
+        var css = \`
+            .announcement-bar-widget {
+                width: 100%;
+                padding: \${currentMessage.padding_vertical}px 20px;
+                background-color: \${currentMessage.bg_color};
+                color: \${currentMessage.text_color};
+                font-family: \${currentMessage.font_family === 'system' ? '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' : currentMessage.font_family};
+                font-size: \${currentMessage.font_size}px;
+                letter-spacing: \${currentMessage.letter_spacing}px;
+                text-align: \${currentMessage.text_align};
+                display: flex;
+                align-items: center;
+                justify-content: \${currentMessage.text_align === 'left' ? 'flex-start' : currentMessage.text_align === 'right' ? 'flex-end' : 'center'};
+                gap: 15px;
+                position: relative;
+                z-index: 9999;
+                box-sizing: border-box;
+            }
+            
+            .announcement-bar-widget * {
+                box-sizing: border-box;
+            }
+            
+            .announcement-bar-widget.sticky {
+                position: sticky;
+                top: 0;
+            }
+            
+            .announcement-bar-widget.bottom {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+            }
+            
+            .announcement-bar-widget.flash {
+                animation: flash 1.5s ease-in-out infinite;
+            }
+            
+            @keyframes flash {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.3; }
+            }
+            
+            .announcement-bar-widget.marquee .announcement-bar-text {
+                animation: marquee 20s linear infinite;
+                display: inline-block;
+                padding-left: 100%;
+            }
+            
+            @keyframes marquee {
+                0% { transform: translateX(100%); }
+                100% { transform: translateX(-100%); }
+            }
+            
+            .announcement-bar-content {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+            
+            .announcement-bar-text {
+                color: inherit;
+            }
+            
+            .announcement-bar-text a {
+                color: inherit;
+                text-decoration: underline;
+            }
+            
+            .announcement-bar-button {
+                padding: 8px 20px;
+                background-color: \${currentMessage.button_bg_color};
+                color: \${currentMessage.button_text_color};
+                border: none;
+                border-radius: 4px;
+                font-size: 14px;
+                font-weight: 600;
+                text-decoration: none;
+                cursor: pointer;
+                transition: opacity 0.2s;
+                white-space: nowrap;
+            }
+            
+            .announcement-bar-button:hover {
+                opacity: 0.8;
+            }
+            
+            .announcement-bar-close {
+                position: absolute;
+                right: 15px;
+                background: transparent;
+                border: none;
+                color: inherit;
+                font-size: 24px;
+                cursor: pointer;
+                opacity: 0.7;
+                padding: 0;
+                line-height: 1;
+            }
+            
+            .announcement-bar-close:hover {
+                opacity: 1;
+            }
+            
+            .announcement-bar-countdown {
+                font-weight: 700;
+                margin-left: 8px;
+            }
+            
+            @media (max-width: 768px) {
+                .announcement-bar-widget {
+                    flex-direction: column;
+                    text-align: center;
+                    padding: 12px 15px;
+                }
+                
+                .announcement-bar-button {
+                    padding: 6px 16px;
+                    font-size: 13px;
+                }
+            }
+        \`;
+        
+        // Add custom CSS if provided
+        if (currentMessage.custom_css) {
+            css += '\\n' + currentMessage.custom_css;
+        }
+        
+        style.textContent = css;
+        document.head.appendChild(style);
+    }
+    
+    // Create the announcement bar
+    function createBar() {
+        if (!shouldShowOnDevice() || !shouldShowOnPage()) {
+            return;
+        }
+        
+        var currentMessage = messages[currentMessageIndex];
+        
+        var bar = document.createElement('div');
+        bar.className = 'announcement-bar-widget';
+        bar.id = 'announcement-bar-' + barId;
+        
+        if (currentMessage.sticky_enabled) {
+            bar.classList.add('sticky');
+        }
+        
+        if (currentMessage.bar_position === 'bottom') {
+            bar.classList.add('bottom');
+        }
+        
+        if (currentMessage.flash_enabled) {
+            bar.classList.add('flash');
+        }
+        
+        if (currentMessage.marquee_enabled) {
+            bar.classList.add('marquee');
+        }
+        
+        // Create content
+        var content = document.createElement('div');
+        content.className = 'announcement-bar-content';
+        
+        var text = document.createElement('span');
+        text.className = 'announcement-bar-text';
+        text.innerHTML = currentMessage.text;
+        content.appendChild(text);
+        
+        // Add countdown if enabled
+        if (currentMessage.countdown_enabled && currentMessage.countdown_date) {
+            var countdown = document.createElement('span');
+            countdown.className = 'announcement-bar-countdown';
+            countdown.id = 'countdown-timer';
+            content.appendChild(countdown);
+            
+            startCountdown(currentMessage.countdown_date, currentMessage.countdown_text || 'Ends in:');
+        }
+        
+        // Add button if exists
+        if (currentMessage.button_text) {
+            var button = document.createElement('a');
+            button.className = 'announcement-bar-button';
+            button.textContent = currentMessage.button_text;
+            button.href = currentMessage.button_url || '#';
+            button.target = '_blank';
+            button.onclick = function() {
+                trackEvent('click');
+            };
+            content.appendChild(button);
+        }
+        
+        bar.appendChild(content);
+        
+        // Add close button if enabled
+        if (currentMessage.close_button_enabled) {
+            var closeBtn = document.createElement('button');
+            closeBtn.className = 'announcement-bar-close';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = function() {
+                bar.remove();
+                trackEvent('close');
+                localStorage.setItem('announcement-bar-closed-' + barId, Date.now());
+            };
+            bar.appendChild(closeBtn);
+        }
+        
+        // Check if user closed this bar recently
+        var closedTime = localStorage.getItem('announcement-bar-closed-' + barId);
+        if (closedTime && (Date.now() - parseInt(closedTime)) < 24 * 60 * 60 * 1000) {
+            return; // Don't show if closed in last 24 hours
+        }
+        
+        // Insert at top or bottom
+        if (currentMessage.bar_position === 'bottom') {
+            document.body.appendChild(bar);
+        } else {
+            document.body.insertBefore(bar, document.body.firstChild);
+        }
+        
+        // Track impression
+        trackEvent('impression');
+        
+        // Execute custom JS if provided
+        if (currentMessage.custom_js) {
+            try {
+                new Function(currentMessage.custom_js)();
+            } catch (e) {
+                console.error('Custom JS error:', e);
+            }
+        }
+    }
+    
+    // Countdown timer
+    function startCountdown(targetDate, label) {
+        var target = new Date(targetDate).getTime();
+        
+        function update() {
+            var now = new Date().getTime();
+            var distance = target - now;
+            
+            var countdownEl = document.getElementById('countdown-timer');
+            if (!countdownEl) {
+                clearInterval(countdownInterval);
+                return;
+            }
+            
+            if (distance < 0) {
+                countdownEl.innerHTML = label + ' <strong>EXPIRED</strong>';
+                clearInterval(countdownInterval);
+                return;
+            }
+            
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            var display = label + ' ';
+            if (days > 0) {
+                display += days + 'd ' + hours + 'h ' + minutes + 'm ' + seconds + 's';
+            } else if (hours > 0) {
+                display += hours + 'h ' + minutes + 'm ' + seconds + 's';
+            } else if (minutes > 0) {
+                display += minutes + 'm ' + seconds + 's';
+            } else {
+                display += seconds + 's';
+            }
+            
+            countdownEl.innerHTML = display;
+        }
+        
+        update();
+        countdownInterval = setInterval(update, 1000);
+    }
+    
+    // Rotation
+    function startRotation() {
+        if (messages.length <= 1 || !barConfig.rotation_enabled) return;
+        
+        rotationInterval = setInterval(function() {
+            currentMessageIndex = (currentMessageIndex + 1) % messages.length;
+            
+            // Remove old bar
+            var oldBar = document.getElementById('announcement-bar-' + barId);
+            if (oldBar) oldBar.remove();
+            
+            // Clear countdown
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            
+            // Inject new styles
+            injectStyles();
+            
+            // Create new bar
+            createBar();
+        }, barConfig.rotation_interval * 1000);
+    }
+    
+    // Initialize
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            injectStyles();
+            createBar();
+            startRotation();
+        });
+    } else {
+        injectStyles();
+        createBar();
+        startRotation();
+    }
+})();
+`;
+}
+
+module.exports = router;

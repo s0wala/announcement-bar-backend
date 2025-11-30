@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Announcement Bar Builder - Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+        }
+
+        /* Announcement Bar Preview */
+        .announcement-bar {
+            width: 100%;
+            padding: 12px 20px;
+            text-align: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .announcement-bar-text {
+            font-size: 14px;
+            flex: 1;
+            max-width: 800px;
+        }
+
+        .announcement-bar-button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: opacity 0.2s;
+        }
+
+        .announcement-bar-button:hover {
+            opacity: 0.8;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0.7;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+        }
+
+        /* Admin Interface */
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .admin-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .admin-header h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .admin-header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .panel h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 8px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="url"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input[type="color"] {
+            width: 60px;
+            height: 40px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .color-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-input-wrapper input[type="text"] {
+            flex: 1;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #5469d4;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4355c6;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .message-list {
+            margin-top: 20px;
+        }
+
+        .message-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .message-item-text {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .message-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-edit {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .btn-delete {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .preview-section {
+            position: sticky;
+            top: 20px;
+        }
+
+        .preview-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .rotation-info {
+            background: #f0f7ff;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #1976d2;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .admin-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Live Preview Announcement Bar -->
+    <div class="announcement-bar" id="announcementBar">
+        <span class="announcement-bar-text" id="barText">🎉 Free Shipping on Orders Over $100!</span>
+        <a href="#" class="announcement-bar-button" id="barButton">Shop Now</a>
+        <button class="close-btn" id="closeBtn">×</button>
+    </div>
+
+    <!-- Admin Interface -->
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>📢 Announcement Bar Builder</h1>
+            <p>Create and customize your announcement bars with live preview</p>
+        </div>
+
+        <div class="admin-layout">
+            <!-- Configuration Panel -->
+            <div class="panel">
+                <h2>Bar Configuration</h2>
+                
+                <div class="form-group">
+                    <label>Message Text</label>
+                    <textarea id="messageText" placeholder="Enter your announcement message...">🎉 Free Shipping on Orders Over $100!</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Background Color</label>
+                    <div class="color-input-wrapper">
+                        <input type="color" id="bgColor" value="#5469d4">
+                        <input type="text" id="bgColorHex" value="#5469d4" placeholder="#5469d4">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Text Color</label>
+                    <div class="color-input-wrapper">
+                        <input type="color" id="textColor" value="#ffffff">
+                        <input type="text" id="textColorHex" value="#ffffff" placeholder="#ffffff">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Font Size</label>
+                    <select id="fontSize">
+                        <option value="12px">Small (12px)</option>
+                        <option value="14px" selected>Medium (14px)</option>
+                        <option value="16px">Large (16px)</option>
+                        <option value="18px">Extra Large (18px)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Button Text</label>
+                    <input type="text" id="buttonText" value="Shop Now" placeholder="Shop Now">
+                </div>
+
+                <div class="form-group">
+                    <label>Button Link</label>
+                    <input type="url" id="buttonLink" value="#" placeholder="https://yourstore.com/collections/all">
+                </div>
+
+                <div class="form-group">
+                    <label>Button Background Color</label>
+                    <div class="color-input-wrapper">
+                        <input type="color" id="buttonBgColor" value="#ffffff">
+                        <input type="text" id="buttonBgColorHex" value="#ffffff" placeholder="#ffffff">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Button Text Color</label>
+                    <div class="color-input-wrapper">
+                        <input type="color" id="buttonTextColor" value="#5469d4">
+                        <input type="text" id="buttonTextColorHex" value="#5469d4" placeholder="#5469d4">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showButton" checked>
+                        <label for="showButton">Show Button</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showCloseBtn" checked>
+                        <label for="showCloseBtn">Show Close Button</label>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" id="saveMessage">Save Message</button>
+                    <button class="btn btn-secondary" id="resetForm">Reset</button>
+                </div>
+
+                <div class="message-list" id="messageList">
+                    <!-- Saved messages will appear here -->
+                </div>
+            </div>
+
+            <!-- Preview Panel -->
+            <div class="panel preview-section">
+                <h2>Live Preview</h2>
+                <p class="preview-label">This is how your announcement bar will look:</p>
+                
+                <div style="border: 2px dashed #ddd; border-radius: 4px; overflow: hidden;">
+                    <div class="announcement-bar" id="previewBar">
+                        <span class="announcement-bar-text" id="previewText">🎉 Free Shipping on Orders Over $100!</span>
+                        <a href="#" class="announcement-bar-button" id="previewButton">Shop Now</a>
+                        <button class="close-btn" id="previewCloseBtn">×</button>
+                    </div>
+                </div>
+
+                <div class="rotation-info" id="rotationInfo">
+                    <strong>💡 Tip:</strong> Save multiple messages to create rotating announcement bars!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let messages = [];
+        let currentMessageIndex = 0;
+        let rotationInterval = null;
+        let editingMessageId = null;
+
+        // DOM elements
+        const messageText = document.getElementById('messageText');
+        const bgColor = document.getElementById('bgColor');
+        const bgColorHex = document.getElementById('bgColorHex');
+        const textColor = document.getElementById('textColor');
+        const textColorHex = document.getElementById('textColorHex');
+        const fontSize = document.getElementById('fontSize');
+        const buttonText = document.getElementById('buttonText');
+        const buttonLink = document.getElementById('buttonLink');
+        const buttonBgColor = document.getElementById('buttonBgColor');
+        const buttonBgColorHex = document.getElementById('buttonBgColorHex');
+        const buttonTextColor = document.getElementById('buttonTextColor');
+        const buttonTextColorHex = document.getElementById('buttonTextColorHex');
+        const showButton = document.getElementById('showButton');
+        const showCloseBtn = document.getElementById('showCloseBtn');
+
+        const previewBar = document.getElementById('previewBar');
+        const previewText = document.getElementById('previewText');
+        const previewButton = document.getElementById('previewButton');
+        const previewCloseBtn = document.getElementById('previewCloseBtn');
+
+        const announcementBar = document.getElementById('announcementBar');
+        const barText = document.getElementById('barText');
+        const barButton = document.getElementById('barButton');
+        const closeBtn = document.getElementById('closeBtn');
+
+        const messageList = document.getElementById('messageList');
+        const rotationInfo = document.getElementById('rotationInfo');
+
+        // Sync color pickers with hex inputs
+        bgColor.addEventListener('input', (e) => bgColorHex.value = e.target.value);
+        bgColorHex.addEventListener('input', (e) => bgColor.value = e.target.value);
+        textColor.addEventListener('input', (e) => textColorHex.value = e.target.value);
+        textColorHex.addEventListener('input', (e) => textColor.value = e.target.value);
+        buttonBgColor.addEventListener('input', (e) => buttonBgColorHex.value = e.target.value);
+        buttonBgColorHex.addEventListener('input', (e) => buttonBgColor.value = e.target.value);
+        buttonTextColor.addEventListener('input', (e) => buttonTextColorHex.value = e.target.value);
+        buttonTextColorHex.addEventListener('input', (e) => buttonTextColor.value = e.target.value);
+
+        // Update preview in real-time
+        function updatePreview() {
+            const config = {
+                message: messageText.value,
+                bgColor: bgColorHex.value,
+                textColor: textColorHex.value,
+                fontSize: fontSize.value,
+                buttonText: buttonText.value,
+                buttonLink: buttonLink.value,
+                buttonBgColor: buttonBgColorHex.value,
+                buttonTextColor: buttonTextColorHex.value,
+                showButton: showButton.checked,
+                showCloseBtn: showCloseBtn.checked
+            };
+
+            applyStyles(previewBar, previewText, previewButton, previewCloseBtn, config);
+        }
+
+        function applyStyles(bar, text, button, closeButton, config) {
+            bar.style.backgroundColor = config.bgColor;
+            text.textContent = config.message;
+            text.style.color = config.textColor;
+            text.style.fontSize = config.fontSize;
+            
+            button.textContent = config.buttonText;
+            button.href = config.buttonLink;
+            button.style.backgroundColor = config.buttonBgColor;
+            button.style.color = config.buttonTextColor;
+            button.style.display = config.showButton ? 'inline-block' : 'none';
+            
+            closeButton.style.color = config.textColor;
+            closeButton.style.display = config.showCloseBtn ? 'flex' : 'none';
+        }
+
+        // Add event listeners for real-time updates
+        [messageText, bgColorHex, textColorHex, fontSize, buttonText, buttonLink, 
+         buttonBgColorHex, buttonTextColorHex, showButton, showCloseBtn].forEach(element => {
+            element.addEventListener('input', updatePreview);
+            element.addEventListener('change', updatePreview);
+        });
+
+        // Save message
+        document.getElementById('saveMessage').addEventListener('click', () => {
+            const config = {
+                id: editingMessageId || Date.now(),
+                message: messageText.value,
+                bgColor: bgColorHex.value,
+                textColor: textColorHex.value,
+                fontSize: fontSize.value,
+                buttonText: buttonText.value,
+                buttonLink: buttonLink.value,
+                buttonBgColor: buttonBgColorHex.value,
+                buttonTextColor: buttonTextColorHex.value,
+                showButton: showButton.checked,
+                showCloseBtn: showCloseBtn.checked
+            };
+
+            if (editingMessageId) {
+                // Update existing message
+                const index = messages.findIndex(m => m.id === editingMessageId);
+                messages[index] = config;
+                editingMessageId = null;
+            } else {
+                // Add new message
+                messages.push(config);
+            }
+
+            renderMessageList();
+            resetForm();
+            startRotation();
+            
+            // Show success feedback
+            const btn = document.getElementById('saveMessage');
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Saved!';
+            btn.style.backgroundColor = '#4caf50';
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.backgroundColor = '';
+            }, 2000);
+        });
+
+        // Reset form
+        document.getElementById('resetForm').addEventListener('click', resetForm);
+
+        function resetForm() {
+            messageText.value = '🎉 Free Shipping on Orders Over $100!';
+            bgColorHex.value = '#5469d4';
+            bgColor.value = '#5469d4';
+            textColorHex.value = '#ffffff';
+            textColor.value = '#ffffff';
+            fontSize.value = '14px';
+            buttonText.value = 'Shop Now';
+            buttonLink.value = '#';
+            buttonBgColorHex.value = '#ffffff';
+            buttonBgColor.value = '#ffffff';
+            buttonTextColorHex.value = '#5469d4';
+            buttonTextColor.value = '#5469d4';
+            showButton.checked = true;
+            showCloseBtn.checked = true;
+            editingMessageId = null;
+            updatePreview();
+        }
+
+        // Render message list
+        function renderMessageList() {
+            if (messages.length === 0) {
+                messageList.innerHTML = '';
+                rotationInfo.innerHTML = '<strong>💡 Tip:</strong> Save multiple messages to create rotating announcement bars!';
+                return;
+            }
+
+            messageList.innerHTML = `
+                <h3 style="font-size: 16px; color: #333; margin-top: 20px; margin-bottom: 10px;">
+                    Saved Messages (${messages.length})
+                </h3>
+            `;
+
+            messages.forEach((msg, index) => {
+                const div = document.createElement('div');
+                div.className = 'message-item';
+                div.innerHTML = `
+                    <div class="message-item-text">
+                        ${index + 1}. ${msg.message.substring(0, 50)}${msg.message.length > 50 ? '...' : ''}
+                    </div>
+                    <div class="message-item-actions">
+                        <button class="btn-small btn-edit" onclick="editMessage(${msg.id})">Edit</button>
+                        <button class="btn-small btn-delete" onclick="deleteMessage(${msg.id})">Delete</button>
+                    </div>
+                `;
+                messageList.appendChild(div);
+            });
+
+            if (messages.length > 1) {
+                rotationInfo.innerHTML = `
+                    <strong>🔄 Rotation Active:</strong> ${messages.length} messages rotating every 5 seconds
+                `;
+            } else {
+                rotationInfo.innerHTML = `
+                    <strong>💡 Tip:</strong> Add more messages to enable rotation!
+                `;
+            }
+        }
+
+        // Edit message
+        window.editMessage = (id) => {
+            const msg = messages.find(m => m.id === id);
+            if (!msg) return;
+
+            messageText.value = msg.message;
+            bgColorHex.value = msg.bgColor;
+            bgColor.value = msg.bgColor;
+            textColorHex.value = msg.textColor;
+            textColor.value = msg.textColor;
+            fontSize.value = msg.fontSize;
+            buttonText.value = msg.buttonText;
+            buttonLink.value = msg.buttonLink;
+            buttonBgColorHex.value = msg.buttonBgColor;
+            buttonBgColor.value = msg.buttonBgColor;
+            buttonTextColorHex.value = msg.buttonTextColor;
+            buttonTextColor.value = msg.buttonTextColor;
+            showButton.checked = msg.showButton;
+            showCloseBtn.checked = msg.showCloseBtn;
+
+            editingMessageId = id;
+            updatePreview();
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // Delete message
+        window.deleteMessage = (id) => {
+            if (confirm('Are you sure you want to delete this message?')) {
+                messages = messages.filter(m => m.id !== id);
+                renderMessageList();
+                if (messages.length === 0) {
+                    stopRotation();
+                    resetForm();
+                } else {
+                    startRotation();
+                }
+            }
+        };
+
+        // Message rotation
+        function startRotation() {
+            stopRotation();
+            
+            if (messages.length === 0) return;
+
+            // Show first message immediately
+            showMessage(0);
+
+            // Only rotate if there's more than one message
+            if (messages.length > 1) {
+                rotationInterval = setInterval(() => {
+                    currentMessageIndex = (currentMessageIndex + 1) % messages.length;
+                    showMessage(currentMessageIndex);
+                }, 5000);
+            }
+        }
+
+        function stopRotation() {
+            if (rotationInterval) {
+                clearInterval(rotationInterval);
+                rotationInterval = null;
+            }
+        }
+
+        function showMessage(index) {
+            if (messages.length === 0) return;
+            
+            const msg = messages[index];
+            applyStyles(announcementBar, barText, barButton, closeBtn, msg);
+        }
+
+        // Close button functionality
+        closeBtn.addEventListener('click', () => {
+            announcementBar.style.display = 'none';
+        });
+
+        previewCloseBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('In the live version, this would close the announcement bar!');
+        });
+
+        // Initialize
+        updatePreview();
+    </script>
+</body>
+</html>
