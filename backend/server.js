@@ -15,11 +15,15 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            imgSrc: ["'self'", "data:", "https:"]
-        }
-    }
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.shopify.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.shopify.com"],
+            imgSrc: ["'self'", "data:", "https:", "https://cdn.shopify.com"],
+            connectSrc: ["'self'", "https:", "wss:"],
+            frameAncestors: ["'self'", "https://admin.shopify.com", "https://*.myshopify.com"], // <--- THIS ALLOWS SHOPIFY
+        },
+    },
+    crossOriginEmbedderPolicy: false, // Required for Shopify
+    frameguard: false // Disable the default frame blocker
 }));
 app.use(cors({
     origin: '*',
