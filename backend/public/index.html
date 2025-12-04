@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Announcement Bar Test</title>
+</head>
+<body style="margin: 0; padding: 60px 20px; font-family: Arial;">
+    <h1>Announcement Bar Test Page</h1>
+    <p>The bar should appear at the very top of this page.</p>
+    <p>If you see a dark red bar with holiday messaging, it's working!</p>
+    
+    <div style="margin-top: 40px; padding: 20px; background: #f0f0f0;">
+        <h2>Debugging Info:</h2>
+        <div id="debug"></div>
+    </div>
+
+    <script>
+        console.log('Test page loaded');
+        document.getElementById('debug').innerHTML = 'Page loaded at: ' + new Date();
+        
+        var script = document.createElement('script');
+        script.src = '/widget/1a54ef45-a6d1-4561-ba06-e1c40af9378b.js';
+        script.async = true;
+        script.onload = function() {
+            console.log('Widget script loaded successfully');
+            document.getElementById('debug').innerHTML += '<br>Widget loaded!';
+        };
+        script.onerror = function() {
+            console.error('Widget script failed to load');
+            document.getElementById('debug').innerHTML += '<br>ERROR: Widget failed to load';
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
