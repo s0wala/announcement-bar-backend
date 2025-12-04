@@ -56,12 +56,13 @@ router.get('/callback', async (req, res) => {
         const shopData = shopResponse.data.shop;
         
         // Create user
+const userEmail = shopData.email || `${shop.replace('.myshopify.com', '')}@shopify-temp.com`;
         await db.query(
             `INSERT INTO users (email, full_name, company_name, website_url, plan, shopify_shop, shopify_access_token)
              VALUES ($1, $2, $3, $4, 'free', $5, $6)
-             ON CONFLICT (email) DO UPDATE 
-             SET shopify_shop = $5, shopify_access_token = $6`,
-            [shopData.email, shopData.shop_owner, shopData.name, `https://${shop}`, shop, accessToken]
+             ON CONFLICT (shopify_shop) DO UPDATE 
+             SET shopify_access_token = $6,
+            [userEmail, shopData.shop_owner, shopData.name, `https://${shop}`, shop, accessToken]
         );
         
         res.send(`
