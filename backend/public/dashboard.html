@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Everything Bar Dashboard</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f7; }
+
+.auth-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex; align-items: center; justify-content: center; z-index: 10000;
+}
+
+.auth-container {
+    background: white; padding: 48px; border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 400px; width: 90%;
+}
+
+.auth-container h1 {
+    font-size: 32px; margin-bottom: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+.auth-container p { color: #666; margin-bottom: 32px; }
+
+.auth-form input {
+    width: 100%; padding: 14px; margin-bottom: 16px;
+    border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;
+}
+
+.auth-form button {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white; border: none; border-radius: 8px;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+}
+
+.auth-toggle { text-align: center; margin-top: 24px; color: #666; font-size: 14px; }
+.auth-toggle a { color: #667eea; text-decoration: none; font-weight: 600; }
+
+.error-msg {
+    color: #dc2626; background: #fee2e2;
+    padding: 12px; border-radius: 6px; margin-bottom: 16px;
+}
+
+.hidden { display: none !important; }
+
+#dashboard-content {
+    max-width: 1200px; margin: 40px auto; padding: 20px;
+    background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.dash-header {
+    padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white; border-radius: 12px 12px 0 0; margin: -20px -20px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.btn-primary { background: #667eea; color: white; }
+.btn-danger { background: #dc2626; color: white; }
+
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
+.form-group input, .form-group textarea { 
+    width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; 
+}
+
+#messages-list { margin-top: 30px; }
+.message-item {
+    background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+</style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="login-screen" class="auth-screen">
+    <div class="auth-container">
+        <h1>Everything Bar</h1>
+        <p>Sign in to your dashboard</p>
+        <div id="login-error" class="error-msg hidden"></div>
+        <form class="auth-form" id="login-form">
+            <input type="email" id="login-email" placeholder="Email" value="soniab@jenniferadams.com" required>
+            <input type="password" id="login-password" placeholder="Password" value="YourPassword123!" required>
+            <button type="submit">Sign In</button>
+        </form>
+        <div class="auth-toggle">
+            Don't have an account? <a href="#" id="show-register">Create one</a>
+        </div>
+    </div>
+</div>
+
+<!-- Register Screen -->
+<div id="register-screen" class="auth-screen hidden">
+    <div class="auth-container">
+        <h1>Create Account</h1>
+        <p>Get started with Everything Bar</p>
+        <div id="register-error" class="error-msg hidden"></div>
+        <form class="auth-form" id="register-form">
+            <input type="text" id="register-name" placeholder="Full Name" required>
+            <input type="email" id="register-email" placeholder="Email" required>
+            <input type="password" id="register-password" placeholder="Password" required>
+            <button type="submit">Create Account</button>
+        </form>
+        <div class="auth-toggle">
+            Already have an account? <a href="#" id="show-login">Sign in</a>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard-screen" class="hidden">
+    <div id="dashboard-content">
+        <div class="dash-header">
+            <h1>Everything Bar Dashboard</h1>
+            <button class="btn" onclick="logout()" style="background: rgba(255,255,255,0.2);">Logout</button>
+        </div>
+
+        <div class="form-group">
+            <label>Message Text</label>
+            <input type="text" id="message-text" placeholder="🎁 Get 25% OFF + Free Shipping!">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+                <label>Background Color</label>
+                <input type="color" id="bg-color" value="#4F46E5">
+            </div>
+            <div class="form-group">
+                <label>Text Color</label>
+                <input type="color" id="text-color" value="#ffffff">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Button Text (Optional)</label>
+            <input type="text" id="button-text" placeholder="Shop Now">
+        </div>
+
+        <div class="form-group">
+            <label>Button URL</label>
+            <input type="text" id="button-url" placeholder="/collections/all">
+        </div>
+
+        <button class="btn btn-primary" onclick="saveMessage()">💾 Save Message</button>
+        <button class="btn btn-danger" onclick="getWidgetCode()">📋 Get Widget Code</button>
+
+        <div id="messages-list"></div>
+    </div>
+</div>
+
+<script>
+const API_URL = 'https://announcement-bar-api.onrender.com/api';
+let authToken = localStorage.getItem('authToken');
+let currentBarId = null;
+
+// Check auth
+if (authToken) verifyAuth();
+else showScreen('login');
+
+async function verifyAuth() {
+    try {
+        const res = await fetch(`${API_URL}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        if (res.ok) {
+            showDashboard();
+        } else {
+            showScreen('login');
+        }
+    } catch (err) {
+        showScreen('login');
+    }
+}
+
+function showScreen(screen) {
+    document.querySelectorAll('.auth-screen, #dashboard-screen').forEach(el => el.classList.add('hidden'));
+    if (screen === 'login') document.getElementById('login-screen').classList.remove('hidden');
+    else if (screen === 'register') document.getElementById('register-screen').classList.remove('hidden');
+}
+
+async function showDashboard() {
+    document.querySelectorAll('.auth-screen').forEach(el => el.classList.add('hidden'));
+    document.getElementById('dashboard-screen').classList.remove('hidden');
+    await loadBars();
+}
+
+// Login
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    
+    try {
+        const res = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            authToken = data.token;
+            localStorage.setItem('authToken', authToken);
+            showDashboard();
+        } else {
+            document.getElementById('login-error').textContent = 'Login failed';
+            document.getElementById('login-error').classList.remove('hidden');
+        }
+    } catch (err) {
+        alert('Network error');
+    }
+});
+
+// Register
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('register-name').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    
+    try {
+        const res = await fetch(`${API_URL}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ full_name: name, email, password })
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            authToken = data.token;
+            localStorage.setItem('authToken', authToken);
+            showDashboard();
+        } else {
+            alert('Registration failed');
+        }
+    } catch (err) {
+        alert('Network error');
+    }
+});
+
+document.getElementById('show-register').addEventListener('click', (e) => {
+    e.preventDefault();
+    showScreen('register');
+});
+
+document.getElementById('show-login').addEventListener('click', (e) => {
+    e.preventDefault();
+    showScreen('login');
+});
+
+function logout() {
+    localStorage.removeItem('authToken');
+    authToken = null;
+    showScreen('login');
+}
+
+async function loadBars() {
+    try {
+        const res = await fetch(`${API_URL}/bars`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        if (res.ok) {
+            const bars = await res.json();
+            if (bars.length > 0) {
+                currentBarId = bars[0].id;
+                loadMessages();
+            } else {
+                await createBar();
+            }
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function createBar() {
+    const res = await fetch(`${API_URL}/bars`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: 'My Bar', is_active: true })
+    });
+    if (res.ok) {
+        const bar = await res.json();
+        currentBarId = bar.id;
+    }
+}
+
+async function loadMessages() {
+    const res = await fetch(`${API_URL}/bars/${currentBarId}/messages`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    if (res.ok) {
+        const messages = await res.json();
+        document.getElementById('messages-list').innerHTML = messages.map(m => `
+            <div class="message-item">
+                <div><strong>${m.text}</strong><br><small>${m.bg_color}</small></div>
+                <button class="btn btn-danger" onclick="deleteMsg('${m.id}')">Delete</button>
+            </div>
+        `).join('');
+    }
+}
+
+async function saveMessage() {
+    const data = {
+        text: document.getElementById('message-text').value,
+        bg_color: document.getElementById('bg-color').value,
+        text_color: document.getElementById('text-color').value,
+        button_text: document.getElementById('button-text').value,
+        button_url: document.getElementById('button-url').value
+    };
+    
+    const res = await fetch(`${API_URL}/bars/${currentBarId}/messages`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+    
+    if (res.ok) {
+        alert('Saved!');
+        loadMessages();
+    } else {
+        alert('Failed to save');
+    }
+}
+
+async function deleteMsg(id) {
+    if (!confirm('Delete?')) return;
+    await fetch(`${API_URL}/bars/${currentBarId}/messages/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    loadMessages();
+}
+
+function getWidgetCode() {
+    const code = `<script src="https://announcement-bar-api.onrender.com/widget/${currentBarId}.js" async></script>`;
+    navigator.clipboard.writeText(code);
+    alert('Widget code copied!\n\n' + code);
+}
+</script>
+</body>
+</html>

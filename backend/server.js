@@ -8,6 +8,8 @@ const cookieParser = require('cookie-parser');
 const publicApiRoutes = require('./routes/public-api');
 
 const app = express();
+// Serve dashboard
+app.use(express.static('public'));
 const PORT = process.env.PORT || 5000;
 
 // Middleware
