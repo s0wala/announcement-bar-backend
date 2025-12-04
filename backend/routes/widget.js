@@ -5,7 +5,8 @@ const router = express.Router();
 
 // GET /widget/:barId.js - Serves the widget JavaScript
 router.get('/:barId.js', async (req, res) => {
-    // Set CORS headers
+    // Set Content-Type and CORS headers
+    res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
