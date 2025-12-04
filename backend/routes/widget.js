@@ -10,6 +10,7 @@ router.get('/:barId.js', async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Credentials', 'false');
     
     try {
         const { barId } = req.params;
@@ -144,7 +145,7 @@ function generateWidgetJs(bar, messages, navLinks) {
             session_id: sessionId
         };
         
-        fetch('/api/analytics/track', {
+        fetch('https://announcement-bar-api.onrender.com/api/analytics/track', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -325,7 +326,7 @@ function generateWidgetJs(bar, messages, navLinks) {
         
         var text = document.createElement('span');
         text.className = 'announcement-bar-text';
-        text.innerHTML = currentMessage.text;
+        text.textContent = currentMessage.text;
         content.appendChild(text);
         
         // Add countdown if enabled
@@ -382,14 +383,6 @@ function generateWidgetJs(bar, messages, navLinks) {
         // Track impression
         trackEvent('impression');
         
-        // Execute custom JS if provided
-        if (currentMessage.custom_js) {
-            try {
-                new Function(currentMessage.custom_js)();
-            } catch (e) {
-                console.error('Custom JS error:', e);
-            }
-        }
     }
     
     // Countdown timer
