@@ -5,15 +5,12 @@ const router = express.Router();
 
 // GET /widget/:barId.js - Serves the widget JavaScript
 router.get('/:barId.js', async (req, res) => {
-    // Set headers for Shopify compatibility
-    res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
+    // Set Content-Type and CORS headers
+    res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS, HEAD');
-    res.setHeader('Access-Control-Allow-Headers', '*');
-    res.setHeader('Access-Control-Expose-Headers', '*');
-    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('Timing-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Credentials', 'false');
     
     try {
         const { barId } = req.params;
@@ -148,7 +145,7 @@ function generateWidgetJs(bar, messages, navLinks) {
             session_id: sessionId
         };
         
-        fetch('https://announcement-bar-api.onrender.com/api/analytics/track', {
+        fetch('/api/analytics/track', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -329,7 +326,7 @@ function generateWidgetJs(bar, messages, navLinks) {
         
         var text = document.createElement('span');
         text.className = 'announcement-bar-text';
-        text.textContent = currentMessage.text;
+        text.innerHTML = currentMessage.text;
         content.appendChild(text);
         
         // Add countdown if enabled
@@ -386,6 +383,14 @@ function generateWidgetJs(bar, messages, navLinks) {
         // Track impression
         trackEvent('impression');
         
+        // Execute custom JS if provided
+        if (currentMessage.custom_js) {
+            try {
+                new Function(currentMessage.custom_js)();
+            } catch (e) {
+                console.error('Custom JS error:', e);
+            }
+        }
     }
     
     // Countdown timer

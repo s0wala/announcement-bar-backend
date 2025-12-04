@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
+const publicApiRoutes = require('./routes/public-api');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -52,6 +53,7 @@ app.use('/api/bars', require('./routes/bars'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/auth/shopify', require('./routes/shopify-auth'));
 app.use('/widget', require('./routes/widget'));
+app.use('/api/public', require('./routes/public-api'));
 
 // Health check
 app.get('/health', (req, res) => {
