@@ -61,7 +61,7 @@ const userEmail = shopData.email || `${shop.replace('.myshopify.com', '')}@shopi
             `INSERT INTO users (email, full_name, company_name, website_url, plan, shopify_shop, shopify_access_token)
              VALUES ($1, $2, $3, $4, 'free', $5, $6)
              ON CONFLICT (shopify_shop) DO UPDATE 
-             SET shopify_access_token = $6,
+             SET shopify_access_token = $6`,
             [userEmail, shopData.shop_owner, shopData.name, `https://${shop}`, shop, accessToken]
         );
         
