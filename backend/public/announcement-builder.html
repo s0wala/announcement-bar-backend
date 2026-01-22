@@ -1,0 +1,2300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Announcement Bar Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Raleway:wght@400;600;700&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #111827;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Auth screens */
+
+        .auth-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .auth-container {
+            background: #ffffff;
+            padding: 40px 32px 32px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 420px;
+            width: 90%;
+        }
+
+        .auth-container h1 {
+            font-size: 28px;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: "Montserrat", sans-serif;
+            font-weight: 700;
+        }
+
+        .auth-container p {
+            color: #6b7280;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        .auth-form input {
+            width: 100%;
+            padding: 11px 12px;
+            margin-bottom: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .auth-form input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .auth-form button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            margin-top: 4px;
+        }
+
+        .auth-form button:hover {
+            transform: translateY(-1px);
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 16px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .auth-toggle a {
+            color: #6366f1;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .error-msg {
+            color: #b91c1c;
+            background: #fee2e2;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .helper-text {
+            font-size: 12px;
+            color: #6b7280;
+            /* soft gray */
+            margin-top: 4px;
+            margin-bottom: 14px;
+            line-height: 1.35;
+        }
+
+
+        /* Force small, rounded color pickers everywhere */
+        #builder-container input[type="color"],
+        input[type="color"] {
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            border: none !important;
+            width: 28px !important;
+            height: 28px !important;
+            padding: 0 !important;
+            border-radius: 999px !important;
+            cursor: pointer !important;
+            overflow: hidden !important;
+        }
+
+        /* Remove default swatch wrapper */
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0 !important;
+        }
+
+        /* Remove default borders inside */
+        input[type="color"]::-webkit-color-swatch {
+            border: none !important;
+            border-radius: 6px !important;
+        }
+
+
+
+        /* Dashboard layout */
+
+        #dashboard {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #f9fafb;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-text strong {
+            font-size: 16px;
+            font-family: "Montserrat", sans-serif;
+        }
+
+        .brand-text span {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .top-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            border-radius: 999px;
+            padding: 7px 14px;
+            border: 1px solid #4b5563;
+            background: transparent;
+            color: #e5e7eb;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+
+        .btn-danger {
+            background: #b91c1c;
+            border-color: #b91c1c;
+            color: #f9fafb;
+        }
+
+        .template-btn {
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #ffffff;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .template-btn:hover {
+            background: #f9fafb;
+            border-color: #667eea;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 2fr 1.3fr;
+            gap: 20px;
+            padding: 20px;
+            align-items: flex-start;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+            padding: 16px 18px;
+            margin-bottom: 16px;
+        }
+
+        .card h2 {
+            font-size: 16px;
+            margin-bottom: 4px;
+            font-family: "Montserrat", sans-serif;
+        }
+
+        .card p.subtext {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            margin-top: 6px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #374151;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="datetime-local"],
+        .form-group input[type="url"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 7px 8px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            font-size: 13px;
+        }
+
+        .form-group input[type="color"] {
+            width: 100%;
+            height: 32px;
+            padding: 0;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            background: #f9fafb;
+        }
+
+        .form-group textarea {
+            min-height: 70px;
+            resize: vertical;
+        }
+
+        .helper-text {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 3px;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .checkbox-row input {
+            width: 14px;
+            height: 14px;
+        }
+
+        .pill-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: #f3f4f6;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        .pill-toggle input {
+            margin: 0;
+        }
+
+        .pill-toggle span {
+            font-size: 12px;
+        }
+
+        /* Preview bar */
+
+        #announcement-bar-preview {
+            width: 100%;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 999px;
+            position: relative;
+            overflow: hidden;
+        }
+
+
+        #announcement-bar-preview-inner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #preview-message {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        #preview-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: none;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        #preview-countdown {
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 8px;
+            display: none;
+        }
+
+        #preview-close {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            border: 1px solid rgba(249, 250, 251, 0.4);
+            background: rgba(17, 24, 39, 0.7);
+            color: #f9fafb;
+            font-size: 14px;
+            line-height: 18px;
+            text-align: center;
+            cursor: pointer;
+            display: none;
+        }
+
+        .marquee {
+            animation: marquee 12s linear infinite;
+            white-space: nowrap;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        .flash {
+            animation: flash 1s step-start infinite;
+        }
+
+        @keyframes flash {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Messages list */
+
+        #messages-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .message-item {
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            background: #ffffff;
+        }
+
+        .message-header-text {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .message-meta {
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 2px;
+        }
+
+        .schedule-info {
+            font-size: 11px;
+            color: #4f46e5;
+        }
+
+        .message-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
+        .pill {
+            font-size: 10px;
+            padding: 3px 7px;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #3730a3;
+        }
+
+        .btn-ghost {
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 2px 4px;
+        }
+
+        .btn-ghost:hover {
+            color: #111827;
+        }
+
+        .small-input {
+            width: 70px !important;
+        }
+
+        .top-bar-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .top-bar-row span.label {
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        .top-bar-row select {
+            padding: 5px 8px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            font-size: 12px;
+        }
+
+        .rotation-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .rotation-row input[type="number"] {
+            width: 70px;
+            padding: 4px 6px;
+            font-size: 12px;
+        }
+
+        .translations-list {
+            margin-top: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 12px;
+        }
+
+        .translations-list input {
+            width: 100%;
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            font-size: 12px;
+        }
+
+        .nav-links-list {
+            margin-top: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 12px;
+        }
+
+        .nav-links-row {
+            display: flex;
+            gap: 6px;
+        }
+
+        .nav-links-row input {
+            flex: 1;
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            font-size: 12px;
+        }
+
+        .nav-links-row .small-input {
+            flex: 0 0 100px;
+        }
+
+        .emoji-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background: #ffffff;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            padding: 0;
+        }
+
+        .emoji-btn:hover {
+            background: #f3f4f6;
+            border-color: #667eea;
+            transform: scale(1.1);
+        }
+
+        .emoji-picker {
+            position: absolute;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            padding: 8px;
+            margin-top: 4px;
+            z-index: 1000;
+            width: 280px;
+        }
+
+        .emoji-picker-header {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 6px;
+        }
+
+        .emoji-tab {
+            flex: 1;
+            padding: 6px 12px;
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .emoji-tab:hover {
+            background: #f3f4f6;
+        }
+
+        .emoji-tab.active {
+            background: #667eea;
+            color: #ffffff;
+        }
+
+        .emoji-picker-content {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .emoji-tab-content {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="auth-screen hidden">
+        <div class="auth-container">
+            <h1>Welcome back</h1>
+            <p>Sign in to manage your announcement bars and messages.</p>
+            <div id="login-error" class="error-msg hidden"></div>
+            <form id="login-form" class="auth-form">
+                <input type="email" id="login-email" placeholder="Email" required />
+                <input type="password" id="login-password" placeholder="Password" required />
+                <button type="submit">Sign In</button>
+            </form>
+            <div class="auth-toggle">
+                Don’t have an account?
+                <a href="#" id="show-register">Create account</a>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Register Screen -->
+    <div id="register-screen" class="auth-screen hidden">
+        <div class="auth-container">
+            <h1>Create account</h1>
+            <p>Set up your dashboard to manage announcement bars.</p>
+            <div id="register-error" class="error-msg hidden"></div>
+            <form id="register-form" class="auth-form">
+                <input type="text" id="register-name" placeholder="Full name" required />
+                <input type="email" id="register-email" placeholder="Email" required />
+                <input type="password" id="register-password" placeholder="Password" required />
+                <input type="text" id="register-company" placeholder="Company name (optional)" />
+                <input type="url" id="register-website" placeholder="Website URL (optional)" />
+                <button type="submit">Create Account</button>
+            </form>
+            <div class="auth-toggle">
+                Already have an account?
+                <a href="#" id="show-login">Sign in</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard">
+        <div class="top-nav">
+            <div class="brand">
+                <div class="brand-icon">A</div>
+                <div class="brand-text">
+                    <strong>Everything Bar</strong>
+                    <span>The only announcement bar</span>
+                </div>
+            </div>
+            <div class="top-nav-actions">
+                <span id="current-bar-label" style="font-size: 12px; color: #9ca3af;"></span>
+                <button id="widget-code-btn" class="btn">Copy Widget Code</button>
+                <button id="logout-btn" class="btn btn-danger">Logout</button>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <!-- Left column: Preview + Builder -->
+            <div>
+                <!-- Preview Card -->
+                <div class="card">
+                    <h2>Live Preview</h2>
+                    <p class="subtext">See exactly how your bar will look on site.</p>
+                    <div id="announcement-bar-preview">
+                        <div id="announcement-bar-preview-inner">
+                            <span id="preview-message">🎉 Welcome! Get 20% off your first order</span>
+                            <span id="preview-countdown"></span>
+                            <button id="preview-button" style="display:none;">Shop Now</button>
+                        </div>
+                        <button id="preview-close">×</button>
+                    </div>
+                    <div class="helper-text" style="margin-top: 6px;">
+                        Position, sticky behavior, close button, and background image will be applied based on your
+                        settings below.
+                    </div>
+                </div>
+                <!-- Templates Card -->
+                <div class="card">
+                    <h2>🎨 Quick Templates</h2>
+                    <p class="subtext">Start with a pre-designed template</p>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
+                        <button class="template-btn" data-template="sale">💰 Flash Sale</button>
+                        <button class="template-btn" data-template="shipping">🚚 Free Shipping</button>
+                        <button class="template-btn" data-template="announcement">📢 Announcement</button>
+                        <button class="template-btn" data-template="holiday">🎄 Holiday</button>
+                    </div>
+                </div>
+                <!-- Builder Card -->
+                <div class="card">
+                    <div class="top-bar-row">
+                        <div>
+                            <h2>Message Builder</h2>
+                            <p class="subtext">Create messages with scheduling, targeting, A/B testing and more.</p>
+                        </div>
+                        <div>
+                            <span class="label">Rotation</span>
+                            <div class="rotation-row">
+                                <input type="checkbox" id="rotation-enabled" />
+                                <label for="rotation-enabled" style="font-size:12px;">Enable rotation</label>
+                                <span style="font-size:12px;">Interval (sec)</span>
+                                <input type="number" id="rotation-interval" class="small-input" value="5" min="1" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message content -->
+                    <div class="form-group">
+                        <label for="message-text">Message Text</label>
+                        <textarea id="message-text"
+                            placeholder="Enter your announcement.">🎉 Welcome! Get 20% off your first order</textarea>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                            <div class="helper-text" style="margin: 0;">Supports emojis and basic HTML links.</div>
+                            <button type="button" id="emoji-picker-btn" class="btn-ghost"
+                                style="font-size: 13px; padding: 4px 8px;">
+                                😊 Insert emoji/icon
+                            </button>
+                        </div>
+                        <div id="emoji-picker" class="emoji-picker hidden">
+                            <div class="emoji-picker-header">
+                                <button type="button" class="emoji-tab active" data-tab="emojis">Emojis</button>
+                                <button type="button" class="emoji-tab" data-tab="icons">Icons</button>
+                            </div>
+                            <div class="emoji-picker-content">
+                                <div id="emojis-tab" class="emoji-tab-content">
+                                    <button type="button" class="emoji-btn" data-emoji="🎉">🎉</button>
+                                    <button type="button" class="emoji-btn" data-emoji="🔥">🔥</button>
+                                    <button type="button" class="emoji-btn" data-emoji="⭐">⭐</button>
+                                    <button type="button" class="emoji-btn" data-emoji="✨">✨</button>
+                                    <button type="button" class="emoji-btn" data-emoji="🎁">🎁</button>
+                                    <button type="button" class="emoji-btn" data-emoji="💝">💝</button>
+                                    <button type="button" class="emoji-btn" data-emoji="🚚">🚚</button>
+                                    <button type="button" class="emoji-btn" data-emoji="📢">📢</button>
+                                    <button type="button" class="emoji-btn" data-emoji="🎄">🎄</button>
+                                    <button type="button" class="emoji-btn" data-emoji="💰">💰</button>
+                                    <button type="button" class="emoji-btn" data-emoji="🏷️">🏷️</button>
+                                    <button type="button" class="emoji-btn" data-emoji="⚡">⚡</button>
+                                    <button type="button" class="emoji-btn" data-emoji="🎊">🎊</button>
+                                    <button type="button" class="emoji-btn" data-emoji="👉">👉</button>
+                                    <button type="button" class="emoji-btn" data-emoji="🛒">🛒</button>
+                                    <button type="button" class="emoji-btn" data-emoji="💎">💎</button>
+                                    <button type="button" class="emoji-btn" data-emoji="🎈">🎈</button>
+                                    <button type="button" class="emoji-btn" data-emoji="🌟">🌟</button>
+                                </div>
+                                <div id="icons-tab" class="emoji-tab-content hidden">
+                                    <button type="button" class="emoji-btn" data-emoji="➡️">➡️</button>
+                                    <button type="button" class="emoji-btn" data-emoji="⬅️">⬅️</button>
+                                    <button type="button" class="emoji-btn" data-emoji="⬆️">⬆️</button>
+                                    <button type="button" class="emoji-btn" data-emoji="⬇️">⬇️</button>
+                                    <button type="button" class="emoji-btn" data-emoji="✅">✅</button>
+                                    <button type="button" class="emoji-btn" data-emoji="❌">❌</button>
+                                    <button type="button" class="emoji-btn" data-emoji="⭐">⭐</button>
+                                    <button type="button" class="emoji-btn" data-emoji="💫">💫</button>
+                                    <button type="button" class="emoji-btn" data-emoji="💎">💎</button>
+                                    <button type="button" class="emoji-btn" data-emoji="🔷">🔷</button>
+                                    <button type="button" class="emoji-btn" data-emoji="🔴">🔴</button>
+                                    <button type="button" class="emoji-btn" data-emoji="⚪">⚪</button>
+                                    <button type="button" class="emoji-btn" data-emoji="❤️">❤️</button>
+                                    <button type="button" class="emoji-btn" data-emoji="💙">💙</button>
+                                    <button type="button" class="emoji-btn" data-emoji="▶️">▶️</button>
+                                    <button type="button" class="emoji-btn" data-emoji="◀️">◀️</button>
+                                    <button type="button" class="emoji-btn" data-emoji="🔺">🔺</button>
+                                    <button type="button" class="emoji-btn" data-emoji="🔻">🔻</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Colors / Typography / Layout -->
+                    <div class="section-title">🎨 Appearance</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bg-color">Background color</label>
+                            <input type="color" id="bg-color" value="#667eea" />
+                        </div>
+                        <div class="form-group">
+                            <label for="text-color">Text color</label>
+                            <input type="color" id="text-color" value="#ffffff" />
+                        </div>
+                        <div class="form-group">
+                            <label for="font-family">Font family</label>
+                            <select id="font-family">
+                                <option value="system">System Default</option>
+                                <optgroup label="Sans Serif">
+                                    <option value="Arial, sans-serif">Arial</option>
+                                    <option value="Helvetica, Arial, sans-serif">Helvetica</option>
+                                    <option value="'Helvetica Neue', Helvetica, Arial, sans-serif">Helvetica Neue
+                                    </option>
+                                    <option value="Verdana, sans-serif">Verdana</option>
+                                    <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                                    <option value="'Gill Sans', sans-serif">Gill Sans</option>
+                                    <option value="'Century Gothic', sans-serif">Century Gothic</option>
+                                    <option value="Montserrat, sans-serif">Montserrat</option>
+                                    <option value="Raleway, sans-serif">Raleway</option>
+                                    <option value="Poppins, sans-serif">Poppins</option>
+                                    <option value="'Open Sans', sans-serif">Open Sans</option>
+                                    <option value="Lato, sans-serif">Lato</option>
+                                </optgroup>
+                                <optgroup label="Serif">
+                                    <option value="'Times New Roman', Times, serif">Times New Roman</option>
+                                    <option value="Georgia, serif">Georgia</option>
+                                    <option value="Garamond, serif">Garamond</option>
+                                    <option value="'Palatino Linotype', 'Book Antiqua', Palatino, serif">Palatino
+                                    </option>
+                                    <option value="'Playfair Display', serif">Playfair Display</option>
+                                    <option value="Merriweather, serif">Merriweather</option>
+                                </optgroup>
+                                <optgroup label="Monospace">
+                                    <option value="'Courier New', Courier, monospace">Courier New</option>
+                                    <option value="Monaco, monospace">Monaco</option>
+                                    <option value="'Lucida Console', monospace">Lucida Console</option>
+                                </optgroup>
+                                <optgroup label="Custom">
+                                    <option value="custom">Upload Custom Font</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="form-group" id="custom-font-upload" style="display: none; grid-column: 1 / -1;">
+                            <label for="custom-font-file">Upload font file (.woff, .woff2, .ttf)</label>
+                            <input type="file" id="custom-font-file" accept=".woff,.woff2,.ttf,.otf" />
+                            <div class="helper-text">Upload a web font file. WOFF2 format recommended.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="font-size">Font size (px)</label>
+                            <input type="number" id="font-size" value="14" min="8" max="40" />
+                        </div>
+                        <div class="form-group">
+                            <label for="letter-spacing">Letter spacing (em)</label>
+                            <input type="number" step="0.01" id="letter-spacing" value="0.00" />
+                        </div>
+                        <div class="form-group">
+                            <label for="text-align">Text alignment</label>
+                            <select id="text-align">
+                                <option value="center">Center</option>
+                                <option value="left">Left</option>
+                                <option value="right">Right</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="padding-vertical">Vertical padding (px)</label>
+                            <input type="number" id="padding-vertical" value="12" min="0" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="pill-toggle">
+                            <input type="checkbox" id="flash-enabled" />
+                            <span>Flash</span>
+                        </div>
+                        <div class="pill-toggle">
+                            <input type="checkbox" id="marquee-enabled" />
+                            <span>Marquee</span>
+                        </div>
+                    </div>
+
+                    <!-- Button -->
+                    <div class="section-title">🔘 Button</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="button-text">Button text</label>
+                            <input type="text" id="button-text" placeholder="e.g. Shop Now" />
+                            <div class="helper-text">
+                                Leave blank to hide the button. Short, action-focused text works best.
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="button-url">Button URL</label>
+                            <input type="url" id="button-url" placeholder="https://yourstore.com" />
+                        </div>
+                        <div class="form-group">
+                            <label for="button-bg">Button background</label>
+                            <input type="color" id="button-bg" value="#9aa6f8" />
+                        </div>
+                        <div class="form-group">
+                            <label for="button-text-color">Button text color</label>
+                            <input type="color" id="button-text-color" value="#111827" />
+                        </div>
+                    </div>
+
+                    <!-- Position / behavior -->
+                    <div class="section-title">📐 Position & Behavior</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bar-position">Bar position</label>
+                            <select id="bar-position">
+                                <option value="top">Top</option>
+                                <option value="bottom">Bottom</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Sticky / Close</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="sticky-enabled" checked />
+                                <label for="sticky-enabled">Sticky</label>
+                            </div>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="close-button-enabled" />
+                                <label for="close-button-enabled">Show close button</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Device targeting</label>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="mobile-only" />
+                                <label for="mobile-only">Mobile only</label>
+                            </div>
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="desktop-only" />
+                                <label for="desktop-only">Desktop only</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scheduling -->
+                    <div class="section-title">⏰ Scheduling</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="start-date">Start date/time</label>
+                            <input type="datetime-local" id="start-date" />
+                        </div>
+                        <div class="form-group">
+                            <label for="end-date">End date/time</label>
+                            <input type="datetime-local" id="end-date" />
+                        </div>
+                    </div>
+
+                    <!-- Page targeting -->
+                    <div class="section-title">🎯 Page Targeting</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="page-targeting-enabled" />
+                                <label for="page-targeting-enabled">Enable page targeting</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="page-targeting-type">Target type</label>
+                            <select id="page-targeting-type">
+                                <option value="all">All pages</option>
+                                <option value="homepage">Homepage</option>
+                                <option value="collection">Collection pages</option>
+                                <option value="product">Product pages</option>
+                                <option value="cart">Cart</option>
+                                <option value="checkout">Checkout</option>
+                                <option value="custom">Custom URL</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="target-url">Custom target URL (if custom)</label>
+                            <input type="text" id="target-url" placeholder="/sale" />
+                        </div>
+                    </div>
+
+                    <!-- Countdown -->
+                    <div class="section-title">⏱ Countdown</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="countdown-enabled" />
+                                <label for="countdown-enabled">Enable countdown</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="countdown-date">Countdown ends at</label>
+                            <input type="datetime-local" id="countdown-date" />
+                        </div>
+                        <div class="form-group">
+                            <label for="countdown-text">Countdown label</label>
+                            <input type="text" id="countdown-text" placeholder="Sale ends in:" />
+                        </div>
+                    </div>
+
+                    <!-- A/B testing -->
+                    <div class="section-title">🧪 A/B Testing</div>
+                    <div class="helper-text">
+                        Optional: enter a Variant B message (and button text) to run an A/B test. If left blank, only
+                        Variant A will show.
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ab-variant-text">Variant B text (optional)</label>
+                            <input type="text" id="ab-variant-text" placeholder="Alternate message text" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ab-variant-button">Variant B button text (optional)</label>
+                            <input type="text" id="ab-variant-button" placeholder="Alternate button text" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ab-traffic-split">Traffic split</label>
+                            <select id="ab-traffic-split">
+                                <option value="50-50">50 / 50</option>
+                                <option value="60-40">60 / 40</option>
+                                <option value="70-30">70 / 30</option>
+                                <option value="80-20">80 / 20</option>
+                                <option value="90-10">90 / 10</option>
+                            </select>
+                            <div class="helper-text" style="margin: 6px 0 0 0;">
+                                Used only if Variant B text is filled in.
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Geo targeting -->
+                    <div class="section-title">🌍 Geo Targeting</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="geo-targeting-enabled" />
+                                <label for="geo-targeting-enabled">Enable geo targeting</label>
+                                <div class="helper-text">
+                                    Show this message only to visitors from selected countries.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="target-countries">Target countries</label>
+                            <select id="target-countries" multiple size="4">
+                                <option value="US">United States</option>
+                                <option value="CA">Canada</option>
+                                <option value="GB">United Kingdom</option>
+                                <option value="AU">Australia</option>
+                                <option value="DE">Germany</option>
+                                <option value="FR">France</option>
+                                <option value="ES">Spain</option>
+                                <option value="IT">Italy</option>
+                                <option value="NL">Netherlands</option>
+                                <option value="BE">Belgium</option>
+                                <option value="SE">Sweden</option>
+                                <option value="NO">Norway</option>
+                                <option value="DK">Denmark</option>
+                                <option value="FI">Finland</option>
+                                <option value="CH">Switzerland</option>
+                                <option value="AT">Austria</option>
+                                <option value="PL">Poland</option>
+                                <option value="IE">Ireland</option>
+                                <option value="PT">Portugal</option>
+                                <option value="GR">Greece</option>
+                                <option value="CZ">Czech Republic</option>
+                                <option value="HU">Hungary</option>
+                                <option value="RO">Romania</option>
+                                <option value="JP">Japan</option>
+                                <option value="KR">South Korea</option>
+                                <option value="CN">China</option>
+                                <option value="IN">India</option>
+                                <option value="SG">Singapore</option>
+                                <option value="HK">Hong Kong</option>
+                                <option value="TW">Taiwan</option>
+                                <option value="TH">Thailand</option>
+                                <option value="MY">Malaysia</option>
+                                <option value="ID">Indonesia</option>
+                                <option value="PH">Philippines</option>
+                                <option value="VN">Vietnam</option>
+                                <option value="NZ">New Zealand</option>
+                                <option value="ZA">South Africa</option>
+                                <option value="BR">Brazil</option>
+                                <option value="MX">Mexico</option>
+                                <option value="AR">Argentina</option>
+                                <option value="CL">Chile</option>
+                                <option value="CO">Colombia</option>
+                                <option value="AE">UAE</option>
+                                <option value="SA">Saudi Arabia</option>
+                                <option value="IL">Israel</option>
+                                <option value="TR">Turkey</option>
+                                <option value="RU">Russia</option>
+                            </select>
+                            <div class="helper-text">Hold Cmd (Mac) or Ctrl (Windows) to select multiple.</div>
+                        </div>
+                    </div>
+
+                    <!-- Background image -->
+                    <div class="section-title">🖼 Background Image</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="background-image-enabled" />
+                                <label for="background-image-enabled">Enable background image</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="background-image-input">Upload image</label>
+                            <input type="file" id="background-image-input" accept="image/*" />
+                        </div>
+                        <div class="form-group">
+                            <label for="background-opacity">Overlay opacity (0–100)</label>
+                            <input type="number" id="background-opacity" value="30" min="0" max="100" />
+                        </div>
+                        <div class="form-group">
+                            <label for="background-position">Background position</label>
+                            <select id="background-position">
+                                <option value="center">Center</option>
+                                <option value="top">Top</option>
+                                <option value="bottom">Bottom</option>
+                                <option value="left">Left</option>
+                                <option value="right">Right</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Translations -->
+                    <div class="section-title">🌐 Translations</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <div class="checkbox-row">
+                                <input type="checkbox" id="translations-enabled" />
+                                <label for="translations-enabled">Enable translations</label>
+                            </div>
+                            <div class="helper-text">For now, store translations as JSON (e.g. {"es":"texto",
+                                "fr":"texte"})</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="translations-json">Translations JSON</label>
+                        <textarea id="translations-json"
+                            placeholder='{"es":"Mensaje en español","fr":"Message en français"}'></textarea>
+                    </div>
+
+                    <!-- Nav links -->
+                    <div class="section-title">🧭 Navigation Links</div>
+                    <div id="nav-links-list" class="nav-links-list"></div>
+                    <button id="add-nav-link-btn" type="button" class="btn-ghost" style="margin-top:4px;">+ Add nav
+                        link</button>
+
+                    <!-- Custom CSS / JS -->
+                    <div class="section-title">🛠 Advanced</div>
+                    <div class="form-group">
+                        <label for="custom-css">Custom CSS</label>
+                        <textarea id="custom-css" placeholder="/* Add your custom CSS here */"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="custom-js">Custom JavaScript</label>
+                        <textarea id="custom-js" placeholder="// Add your custom JS here"></textarea>
+                    </div>
+
+                    <!-- Save -->
+                    <div style="margin-top:12px; display:flex; justify-content:flex-end; gap:8px;">
+                        <button id="save-message-btn" type="button" class="btn btn-primary">Add to rotation</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column: Bars + Messages -->
+            <div>
+                <!-- Bar selector -->
+                <div class="card">
+                    <h2>Your Bars</h2>
+                    <p class="subtext">Each bar can have its own set of rotating messages.</p>
+                    <div class="form-group">
+                        <label for="bar-select">Select bar</label>
+                        <select id="bar-select"></select>
+                        <div class="helper-text">A default bar will be created automatically if you don't have one yet.
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:4px;">
+                        <button id="refresh-bars-btn" type="button" class="btn">Reload bars</button>
+                        <button id="create-bar-btn" type="button" class="btn btn-primary">Create new bar</button>
+                    </div>
+                </div>
+
+                <!-- Messages list -->
+                <div class="card">
+                    <h2>Messages in this bar</h2>
+                    <p class="subtext">Edit or delete messages that are currently in rotation.</p>
+                    <div id="messages-list">
+                        <p class="helper-text">No messages yet. Add your first one using the builder.</p>
+                    </div>
+                </div>
+                <!-- Analytics Card -->
+                <div class="card">
+                    <h2>📊 Analytics</h2>
+                    <p class="subtext">Performance metrics for this bar</p>
+                    <div id="analytics-summary"
+                        style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:10px;">
+                        <div style="background:#f9fafb; padding:12px; border-radius:8px;">
+                            <div style="font-size:24px; font-weight:700; color:#667eea;" id="total-impressions">-</div>
+                            <div style="font-size:11px; color:#6b7280;">Total Impressions</div>
+                        </div>
+                        <div style="background:#f9fafb; padding:12px; border-radius:8px;">
+                            <div style="font-size:24px; font-weight:700; color:#667eea;" id="total-clicks">-</div>
+                            <div style="font-size:11px; color:#6b7280;">Total Clicks</div>
+                        </div>
+                        <div style="background:#f9fafb; padding:12px; border-radius:8px;">
+                            <div style="font-size:24px; font-weight:700; color:#667eea;" id="ctr-rate">-</div>
+                            <div style="font-size:11px; color:#6b7280;">Click Rate</div>
+                        </div>
+                        <div style="background:#f9fafb; padding:12px; border-radius:8px;">
+                            <div style="font-size:24px; font-weight:700; color:#667eea;" id="close-rate">-</div>
+                            <div style="font-size:11px; color:#6b7280;">Close Rate</div>
+                        </div>
+                    </div>
+                    <button id="refresh-analytics-btn" class="btn" style="margin-top:10px; width:100%;">Refresh
+                        Analytics</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================
+        // AUTH + API INTEGRATION
+        // =========================
+
+        const API_BASE = "https://announcement-bar-api.onrender.com/api";
+        let authToken = null;
+        let currentUser = null;
+        let currentBarId = null;
+        let backgroundImageData = null;
+
+        function show(el) { el.classList.remove("hidden"); }
+        function hide(el) { el.classList.add("hidden"); }
+
+        const loginScreen = document.getElementById("login-screen");
+        const registerScreen = document.getElementById("register-screen");
+        const dashboard = document.getElementById("dashboard");
+
+        const loginForm = document.getElementById("login-form");
+        const registerForm = document.getElementById("register-form");
+        const loginError = document.getElementById("login-error");
+        const registerError = document.getElementById("register-error");
+
+        const showRegisterLink = document.getElementById("show-register");
+        const showLoginLink = document.getElementById("show-login");
+        const logoutBtn = document.getElementById("logout-btn");
+
+        const barSelect = document.getElementById("bar-select");
+        const refreshBarsBtn = document.getElementById("refresh-bars-btn");
+        const createBarBtn = document.getElementById("create-bar-btn");
+        const currentBarLabel = document.getElementById("current-bar-label");
+        const widgetCodeBtn = document.getElementById("widget-code-btn");
+        const messagesListEl = document.getElementById("messages-list");
+        const totalImpressionsEl = document.getElementById("total-impressions");
+        const totalClicksEl = document.getElementById("total-clicks");
+        const ctrRateEl = document.getElementById("ctr-rate");
+        const closeRateEl = document.getElementById("close-rate");
+        const refreshAnalyticsBtn = document.getElementById("refresh-analytics-btn");
+        const rotationEnabledInput = document.getElementById("rotation-enabled");
+        const rotationIntervalInput = document.getElementById("rotation-interval");
+
+        // Auth toggle
+        showRegisterLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            hide(loginScreen);
+            show(registerScreen);
+        });
+
+        showLoginLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            hide(registerScreen);
+            show(loginScreen);
+        });
+
+        logoutBtn.addEventListener("click", () => {
+            authToken = null;
+            currentUser = null;
+            currentBarId = null;
+            barSelect.innerHTML = "";
+            messagesListEl.innerHTML = "";
+            hide(dashboard);
+            show(loginScreen);
+        });
+
+        function setAuthToken(token) {
+            authToken = token;
+            if (token) {
+                localStorage.setItem("announcement_bar_token", token);
+            } else {
+                localStorage.removeItem("announcement_bar_token");
+            }
+        }
+
+        async function apiRequest(path, options = {}) {
+            const headers = {
+                "Content-Type": "application/json",
+                ...(options.headers || {})
+            };
+
+            // Add authorization header if token exists
+            if (authToken) {
+                headers["Authorization"] = `Bearer ${authToken}`;
+            }
+
+            const res = await fetch(`${API_BASE}${path}`, {
+                headers,
+                ...options,
+            });
+
+            if (!res.ok) {
+                const text = await res.text().catch(() => "");
+                throw new Error(`Request failed (${res.status}): ${text || res.statusText}`);
+            }
+
+            // If no body (204) just return null
+            if (res.status === 204) return null;
+
+            return res.json();
+        }
+
+
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            loginError.classList.add("hidden");
+            try {
+                const email = document.getElementById("login-email").value.trim();
+                const password = document.getElementById("login-password").value;
+                const data = await apiRequest("/auth/login", {
+                    method: "POST",
+                    body: JSON.stringify({ email, password })
+                });
+                setAuthToken(data.token);
+                currentUser = data.user;
+                hide(loginScreen);
+                hide(registerScreen);
+                show(dashboard);
+                await initializeDashboard();
+            } catch (err) {
+                loginError.textContent = err.message || "Login failed";
+                loginError.classList.remove("hidden");
+            }
+        });
+
+        registerForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            registerError.classList.add("hidden");
+            try {
+                const full_name = document.getElementById("register-name").value.trim();
+                const email = document.getElementById("register-email").value.trim();
+                const password = document.getElementById("register-password").value;
+                const company_name = document.getElementById("register-company").value.trim() || undefined;
+                const website_url = document.getElementById("register-website").value.trim() || undefined;
+
+                const data = await apiRequest("/auth/register", {
+                    method: "POST",
+                    body: JSON.stringify({ full_name, email, password, company_name, website_url })
+                });
+                setAuthToken(data.token);
+                currentUser = data.user;
+                hide(loginScreen);
+                hide(registerScreen);
+                show(dashboard);
+                await initializeDashboard();
+            } catch (err) {
+                registerError.textContent = err.message || "Registration failed";
+                registerError.classList.remove("hidden");
+            }
+        });
+
+        async function initializeDashboard() {
+            try {
+                await loadUserBars();
+                if (!currentBarId) {
+                    const bar = await createBar();
+                    currentBarId = bar.id;
+                    await loadUserBars();
+                }
+                await loadSelectedBarSettings();
+                await loadMessagesForCurrentBar();
+                updateCurrentBarLabel();
+                await loadAnalytics();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function loadUserBars() {
+            const bars = await apiRequest("/bars", { method: "GET" });
+            barSelect.innerHTML = "";
+            if (!bars.length) {
+                currentBarId = null;
+                return;
+            }
+            bars.forEach((bar) => {
+                const opt = document.createElement("option");
+                opt.value = bar.id;
+                opt.textContent = bar.name || "Untitled bar";
+                barSelect.appendChild(opt);
+            });
+            if (!currentBarId) {
+                currentBarId = bars[0].id;
+            }
+            barSelect.value = currentBarId;
+        }
+
+        async function createBar() {
+            const name = prompt("Name your new announcement bar:", "Default Bar");
+            const body = { name: name || "Default Bar", is_active: true };
+            const bar = await apiRequest("/bars", {
+                method: "POST",
+                body: JSON.stringify(body)
+            });
+            currentBarId = bar.id;
+            return bar;
+        }
+
+        async function ensureCurrentBar() {
+            if (currentBarId) return;
+
+            // Try to load bars
+            const bars = await apiRequest("/bars", { method: "GET" });
+            if (bars && bars.length) {
+                currentBarId = bars[0].id;
+                barSelect.value = currentBarId;
+                return;
+            }
+
+            // If none exist, create one
+            const name = "Everything Bar";
+            const body = { name, is_active: true };
+            const bar = await apiRequest("/bars", {
+                method: "POST",
+                body: JSON.stringify(body),
+            });
+            currentBarId = bar.id;
+            barSelect.value = currentBarId;
+        }
+
+
+        async function loadSelectedBarSettings() {
+            if (!currentBarId) return;
+            const bar = await apiRequest(`/bars/${currentBarId}`, { method: "GET" });
+            rotationEnabledInput.checked = !!bar.rotation_enabled;
+            rotationIntervalInput.value = bar.rotation_interval || 5;
+        }
+
+        async function saveBarSettings() {
+            if (!currentBarId) return;
+            const rotation_enabled = rotationEnabledInput.checked;
+            const rotation_interval = parseInt(rotationIntervalInput.value) || 5;
+            await apiRequest(`/bars/${currentBarId}`, {
+                method: "PUT",
+                body: JSON.stringify({ rotation_enabled, rotation_interval })
+            });
+        }
+
+        async function loadMessagesForCurrentBar() {
+            if (!currentBarId) return;
+            const messages = await apiRequest(`/bars/${currentBarId}/messages`, { method: "GET" });
+            renderExistingMessages(messages || []);
+        }
+
+        function renderExistingMessages(messages) {
+            if (!messages.length) {
+                messagesListEl.innerHTML = '<p class="helper-text">No messages yet. Add your first one using the builder.</p>';
+                return;
+            }
+            messagesListEl.innerHTML = "";
+            messages.forEach((msg) => {
+                const item = document.createElement("div");
+                item.className = "message-item";
+
+                const headerDiv = document.createElement("div");
+                const textDiv = document.createElement("div");
+                textDiv.className = "message-header-text";
+                const fullText = msg.text || "";
+                textDiv.textContent = fullText.length > 120 ? fullText.slice(0, 120) + "…" : fullText;
+
+                const metaDiv = document.createElement("div");
+                metaDiv.className = "message-meta";
+                const bits = [];
+                bits.push(`BG: ${msg.bg_color || msg.bgColor || "#000"} · Text: ${msg.text_color || msg.textColor || "#fff"}`);
+                if (msg.button_text || msg.buttonText) bits.push(`Button: "${msg.button_text || msg.buttonText}"`);
+                if (msg.countdown_enabled || msg.countdownEnabled) bits.push("Countdown");
+                if (msg.background_image_enabled || msg.backgroundImageEnabled) bits.push("BG Image");
+                metaDiv.textContent = bits.join(" · ");
+
+                headerDiv.appendChild(textDiv);
+                headerDiv.appendChild(metaDiv);
+
+                const infoLines = [];
+
+                if (msg.start_date || msg.end_date) {
+                    const start = msg.start_date || msg.startDate;
+                    const end = msg.end_date || msg.endDate;
+                    let txt = "⏰ ";
+                    if (start) txt += "Starts: " + new Date(start).toLocaleString();
+                    if (end) txt += (start ? " · " : "") + "Ends: " + new Date(end).toLocaleString();
+                    infoLines.push(txt);
+                }
+
+                if (msg.page_targeting_enabled || msg.pageTargetingEnabled) {
+                    const type = msg.page_targeting_type || msg.pageTargetingType;
+                    const url = msg.target_url || msg.targetUrl;
+                    let t = "🎯 Target: " + (type || "custom");
+                    if (type === "custom" && url) t += ` (${url})`;
+                    infoLines.push(t);
+                }
+
+                if (msg.ab_testing_enabled || msg.abTestingEnabled) {
+                    const split = msg.ab_traffic_split || msg.abTrafficSplit || "50-50";
+                    infoLines.push("🧪 A/B: " + split);
+                }
+
+                if (msg.geo_targeting_enabled || msg.geoTargetingEnabled) {
+                    const countries = msg.target_countries || msg.targetCountries || [];
+                    if (countries.length) {
+                        infoLines.push("🌍 " + countries.join(", "));
+                    }
+                }
+
+                infoLines.forEach((txt) => {
+                    const d = document.createElement("div");
+                    d.className = "schedule-info";
+                    d.textContent = txt;
+                    headerDiv.appendChild(d);
+                });
+
+                const actionsDiv = document.createElement("div");
+                actionsDiv.className = "message-actions";
+
+                const statusPill = document.createElement("div");
+                statusPill.className = "pill";
+                statusPill.textContent = "Active";
+                actionsDiv.appendChild(statusPill);
+
+                const delBtn = document.createElement("button");
+                delBtn.className = "btn-ghost";
+                delBtn.textContent = "Delete";
+                delBtn.addEventListener("click", async () => {
+                    if (!confirm("Delete this message?")) return;
+                    await apiRequest(`/bars/${currentBarId}/messages/${msg.id}`, { method: "DELETE" });
+                    await loadMessagesForCurrentBar();
+                });
+                actionsDiv.appendChild(delBtn);
+
+                item.appendChild(headerDiv);
+                item.appendChild(actionsDiv);
+                messagesListEl.appendChild(item);
+            });
+        }
+
+        barSelect.addEventListener("change", async () => {
+            currentBarId = barSelect.value;
+            await loadSelectedBarSettings();
+            await loadMessagesForCurrentBar();
+            updateCurrentBarLabel();
+        });
+
+        refreshBarsBtn.addEventListener("click", async () => {
+            await loadUserBars();
+            await loadSelectedBarSettings();
+            await loadMessagesForCurrentBar();
+            updateCurrentBarLabel();
+        });
+
+        createBarBtn.addEventListener("click", async () => {
+            const bar = await createBar();
+            await loadUserBars();
+            barSelect.value = bar.id;
+            await loadSelectedBarSettings();
+            await loadMessagesForCurrentBar();
+            updateCurrentBarLabel();
+        });
+
+        rotationEnabledInput.addEventListener("change", saveBarSettings);
+        rotationIntervalInput.addEventListener("change", saveBarSettings);
+
+        function updateCurrentBarLabel() {
+            if (!currentBarId) {
+                currentBarLabel.textContent = "";
+                return;
+            }
+            const selectedOption = barSelect.options[barSelect.selectedIndex];
+            currentBarLabel.textContent = `Active bar: ${selectedOption ? selectedOption.textContent : ""}`;
+        }
+
+        widgetCodeBtn.addEventListener("click", () => {
+            if (!currentBarId) {
+                alert("Select a bar first.");
+                return;
+            }
+
+            const widgetCode =
+                '<script src="https://announcement-bar-api.onrender.com/widget/' +
+                currentBarId +
+                '.js" async><\/script>';
+
+            navigator.clipboard.writeText(widgetCode)
+                .then(() => {
+                    alert(
+                        "Widget code copied to clipboard!\n\nAdd this to your theme's <head>:\n\n" +
+                        widgetCode
+                    );
+                })
+                .catch(() => {
+                    prompt("Copy this code:", widgetCode);
+                });
+        });
+
+
+        // =========================
+        // BUILDER LOGIC
+        // =========================
+
+        const previewBar = document.getElementById("announcement-bar-preview");
+        const previewInner = document.getElementById("announcement-bar-preview-inner");
+        const previewMessage = document.getElementById("preview-message");
+        const previewButton = document.getElementById("preview-button");
+        const previewCountdown = document.getElementById("preview-countdown");
+        const previewClose = document.getElementById("preview-close");
+
+        // Builder inputs
+        const messageTextInput = document.getElementById("message-text");
+        const bgColorInput = document.getElementById("bg-color");
+        const textColorInput = document.getElementById("text-color");
+        function updateTextColorOutline() {
+            const val = (textColorInput.value || "").toLowerCase();
+            if (val === "#ffffff" || val === "#fff") {
+                // Light gray outline so it’s visible
+                textColorInput.style.boxShadow = "0 0 0 1px #d0d0e0";
+                textColorInput.style.borderColor = "#d0d0e0";
+            } else {
+                // Let the browser’s default styling take over
+                textColorInput.style.boxShadow = "";
+                textColorInput.style.borderColor = "";
+            }
+        }
+        function attachWhiteOutlineHandler(inputEl) {
+            function refresh() {
+                const val = (inputEl.value || "").toLowerCase();
+                if (val === "#ffffff" || val === "#fff") {
+                    inputEl.style.boxShadow = "0 0 0 1px #d0d0e0";
+                    inputEl.style.borderColor = "#d0d0e0";
+                } else {
+                    inputEl.style.boxShadow = "";
+                    inputEl.style.borderColor = "";
+                }
+            }
+            refresh();
+            inputEl.addEventListener("input", refresh);
+            inputEl.addEventListener("change", refresh);
+        }
+
+        attachWhiteOutlineHandler(document.getElementById("text-color"));
+        attachWhiteOutlineHandler(document.getElementById("bg-color"));
+        attachWhiteOutlineHandler(document.getElementById("button-bg"));
+        attachWhiteOutlineHandler(document.getElementById("button-text-color"));
+
+
+        // Run once on load
+        updateTextColorOutline();
+
+        // Re-run whenever the color changes
+        textColorInput.addEventListener("input", updateTextColorOutline);
+        textColorInput.addEventListener("change", updateTextColorOutline);
+
+        const fontFamilyInput = document.getElementById("font-family");
+        const fontSizeInput = document.getElementById("font-size");
+        const letterSpacingInput = document.getElementById("letter-spacing");
+        const textAlignInput = document.getElementById("text-align");
+        const paddingVerticalInput = document.getElementById("padding-vertical");
+        const flashEnabledInput = document.getElementById("flash-enabled");
+        const marqueeEnabledInput = document.getElementById("marquee-enabled");
+        const buttonTextInput = document.getElementById("button-text");
+        const buttonUrlInput = document.getElementById("button-url");
+        const buttonBgInput = document.getElementById("button-bg");
+        const buttonTextColorInput = document.getElementById("button-text-color");
+        const barPositionInput = document.getElementById("bar-position");
+        const stickyEnabledInput = document.getElementById("sticky-enabled");
+        const closeButtonEnabledInput = document.getElementById("close-button-enabled");
+        const mobileOnlyInput = document.getElementById("mobile-only");
+        const desktopOnlyInput = document.getElementById("desktop-only");
+        const startDateInput = document.getElementById("start-date");
+        const endDateInput = document.getElementById("end-date");
+        const pageTargetingEnabledInput = document.getElementById("page-targeting-enabled");
+        const pageTargetingTypeInput = document.getElementById("page-targeting-type");
+        const targetUrlInput = document.getElementById("target-url");
+        const countdownEnabledInput = document.getElementById("countdown-enabled");
+        const countdownDateInput = document.getElementById("countdown-date");
+        const countdownTextInput = document.getElementById("countdown-text");
+        const abTestingEnabledInput = document.getElementById("ab-testing-enabled");
+        const abVariantTextInput = document.getElementById("ab-variant-text");
+        const abVariantButtonInput = document.getElementById("ab-variant-button");
+        const abTrafficSplitInput = document.getElementById("ab-traffic-split");
+        const geoTargetingEnabledInput = document.getElementById("geo-targeting-enabled");
+        const targetCountriesSelect = document.getElementById("target-countries");
+        const backgroundImageEnabledInput = document.getElementById("background-image-enabled");
+        const backgroundImageInput = document.getElementById("background-image-input");
+        const backgroundOpacityInput = document.getElementById("background-opacity");
+        const backgroundPositionInput = document.getElementById("background-position");
+        const translationsEnabledInput = document.getElementById("translations-enabled");
+        const translationsJsonInput = document.getElementById("translations-json");
+        const customCssInput = document.getElementById("custom-css");
+        const customJsInput = document.getElementById("custom-js");
+        const saveMessageBtn = document.getElementById("save-message-btn");
+        const addNavLinkBtn = document.getElementById("add-nav-link-btn");
+        const navLinksListEl = document.getElementById("nav-links-list");
+
+        let navLinks = [];
+
+        function updatePreview() {
+            // Message
+            previewMessage.innerHTML = messageTextInput.value || "Your message here";
+
+            // Colors
+            previewBar.style.backgroundColor = bgColorInput.value;
+            previewBar.style.color = textColorInput.value;
+            previewMessage.style.color = textColorInput.value;
+            previewCountdown.style.color = textColorInput.value;
+
+            // Typography
+            if (fontFamilyInput.value === "custom" && customFontName) {
+                previewMessage.style.fontFamily = customFontName;
+            } else if (fontFamilyInput.value === "system") {
+                previewMessage.style.fontFamily = "";
+            } else {
+                previewMessage.style.fontFamily = fontFamilyInput.value;
+            }
+            previewMessage.style.fontSize = (parseInt(fontSizeInput.value) || 14) + "px";
+            previewMessage.style.letterSpacing = (parseFloat(letterSpacingInput.value) || 0).toString() + "em";
+            previewInner.style.justifyContent = textAlignInput.value === "center" ? "center" :
+                textAlignInput.value === "left" ? "flex-start" : "flex-end";
+            previewBar.style.paddingTop = previewBar.style.paddingBottom = (parseInt(paddingVerticalInput.value) || 12) +
+                "px";
+
+            // Button
+            const buttonText = buttonTextInput.value.trim();
+            if (buttonText) {
+                previewButton.style.display = "inline-flex";
+                previewButton.textContent = buttonText;
+                previewButton.style.backgroundColor = buttonBgInput.value;
+                previewButton.style.color = buttonTextColorInput.value;
+            } else {
+                previewButton.style.display = "none";
+            }
+
+            // Effects
+            previewMessage.classList.toggle("flash", flashEnabledInput.checked);
+            previewMessage.classList.toggle("marquee", marqueeEnabledInput.checked);
+
+            // Countdown stub (just show label)
+            if (countdownEnabledInput.checked && countdownTextInput.value.trim()) {
+                previewCountdown.style.display = "inline";
+                previewCountdown.textContent = countdownTextInput.value.trim() + " 00:00:00";
+            } else {
+                previewCountdown.style.display = "none";
+            }
+
+            // Close button
+            previewClose.style.display = closeButtonEnabledInput.checked ? "block" : "none";
+
+            // Background image
+            if (backgroundImageEnabledInput.checked && backgroundImageData) {
+                const alpha =
+                    (100 - (parseInt(backgroundOpacityInput.value, 10) || 30)) / 100;
+
+                previewBar.style.backgroundImage =
+                    "linear-gradient(rgba(0,0,0," + alpha + "), rgba(0,0,0," + alpha + ")), url(" + backgroundImageData + ")";
+
+                previewBar.style.backgroundSize = "cover";
+                previewBar.style.backgroundPosition =
+                    backgroundPositionInput.value || "center";
+            } else {
+                previewBar.style.backgroundImage = "none";
+            }
+
+
+
+        }
+
+        backgroundImageInput.addEventListener("change", () => {
+            const file = backgroundImageInput.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                backgroundImageData = evt.target.result;
+                updatePreview();
+            };
+            reader.readAsDataURL(file);
+        });
+        let customFontData = null;
+        let customFontName = null;
+
+        fontFamilyInput.addEventListener("change", () => {
+            const customFontUpload = document.getElementById("custom-font-upload");
+            if (fontFamilyInput.value === "custom") {
+                customFontUpload.style.display = "block";
+            } else {
+                customFontUpload.style.display = "none";
+            }
+            updatePreview();
+        });
+
+        document.getElementById("custom-font-file").addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                customFontData = evt.target.result;
+                customFontName = "CustomFont-" + Date.now();
+
+                // Create @font-face rule
+                const fontFormat = file.name.endsWith('.woff2') ? 'woff2' :
+                    file.name.endsWith('.woff') ? 'woff' :
+                        file.name.endsWith('.ttf') ? 'truetype' : 'opentype';
+
+                const style = document.createElement('style');
+                style.textContent = `
+            @font-face {
+                font-family: '${customFontName}';
+                src: url(${customFontData}) format('${fontFormat}');
+            }
+        `;
+                document.head.appendChild(style);
+
+                // Update preview with custom font
+                if (fontFamilyInput.value === "custom" && customFontName) {
+                    previewMessage.style.fontFamily = customFontName;
+                } else if (fontFamilyInput.value === "system") {
+                    previewMessage.style.fontFamily = "";
+                } else {
+                    previewMessage.style.fontFamily = fontFamilyInput.value;
+                }
+                alert("Custom font loaded! Preview updated.");
+            };
+            reader.readAsDataURL(file);
+        });
+        [
+            messageTextInput,
+            bgColorInput,
+            textColorInput,
+            fontFamilyInput,
+            fontSizeInput,
+            letterSpacingInput,
+            textAlignInput,
+            paddingVerticalInput,
+            flashEnabledInput,
+            marqueeEnabledInput,
+            buttonTextInput,
+            buttonUrlInput,
+            buttonBgInput,
+            buttonTextColorInput,
+            barPositionInput,
+            stickyEnabledInput,
+            closeButtonEnabledInput,
+            mobileOnlyInput,
+            desktopOnlyInput,
+            startDateInput,
+            endDateInput,
+            pageTargetingEnabledInput,
+            pageTargetingTypeInput,
+            targetUrlInput,
+            countdownEnabledInput,
+            countdownDateInput,
+            countdownTextInput,
+            abTestingEnabledInput,
+            abVariantTextInput,
+            abVariantButtonInput,
+            abTrafficSplitInput,
+            geoTargetingEnabledInput,
+            targetCountriesSelect,
+            backgroundImageEnabledInput,
+            backgroundOpacityInput,
+            backgroundPositionInput,
+            translationsEnabledInput,
+            translationsJsonInput,
+            customCssInput,
+            customJsInput
+        ].forEach((el) => {
+            const eventName = el && (el.tagName === "TEXTAREA" || el.type === "text" || el.type === "number" || el.type ===
+                "url" || el.type === "datetime-local") ? "input" : "change";
+            el && el.addEventListener(eventName, updatePreview);
+        });
+
+        previewClose.addEventListener("click", () => {
+            previewBar.style.display = "none";
+        });
+
+        function getSelectedCountries() {
+            return Array.from(targetCountriesSelect.selectedOptions).map((o) => o.value);
+        }
+
+        function safeParseJSON(str) {
+            if (!str || !str.trim()) return null;
+            try {
+                return JSON.parse(str);
+            } catch {
+                return null;
+            }
+        }
+
+        function collectMessagePayload() {
+            const msg = {
+                text: messageTextInput.value,
+                bgColor: bgColorInput.value,
+                textColor: textColorInput.value,
+                fontFamily: fontFamilyInput.value === "custom" ? customFontName : fontFamilyInput.value,
+                customFontData: fontFamilyInput.value === "custom" ? customFontData : null,
+                fontSize: parseInt(fontSizeInput.value) || 14,
+                letterSpacing: parseFloat(letterSpacingInput.value) || 0,
+                textAlign: textAlignInput.value,
+                paddingVertical: parseInt(paddingVerticalInput.value) || 12,
+                flashEnabled: flashEnabledInput.checked,
+                marqueeEnabled: marqueeEnabledInput.checked,
+                buttonText: buttonTextInput.value,
+                buttonUrl: buttonUrlInput.value,
+                buttonBg: buttonBgInput.value,
+                buttonTextColor: buttonTextColorInput.value,
+                startDate: startDateInput.value || null,
+                endDate: endDateInput.value || null,
+                barPosition: barPositionInput.value,
+                stickyEnabled: stickyEnabledInput.checked,
+                closeButtonEnabled: closeButtonEnabledInput.checked,
+                mobileOnly: mobileOnlyInput.checked,
+                desktopOnly: desktopOnlyInput.checked,
+                pageTargetingEnabled: pageTargetingEnabledInput.checked,
+                pageTargetingType: pageTargetingTypeInput.value,
+                targetUrl: targetUrlInput.value,
+                countdownEnabled: countdownEnabledInput.checked,
+                countdownDate: countdownDateInput.value || null,
+                countdownText: countdownTextInput.value,
+                abTestingEnabled: abTestingEnabledInput.checked,
+                abVariantText: abVariantTextInput.value,
+                abVariantButton: abVariantButtonInput.value,
+                abTrafficSplit: abTrafficSplitInput.value,
+                geoTargetingEnabled: geoTargetingEnabledInput.checked,
+                targetCountries: getSelectedCountries(),
+                backgroundImageEnabled: backgroundImageEnabledInput.checked,
+                backgroundImageData: backgroundImageData,
+                backgroundOpacity: parseInt(backgroundOpacityInput.value) || 30,
+                backgroundPosition: backgroundPositionInput.value,
+                translationsEnabled: translationsEnabledInput.checked,
+                translations: safeParseJSON(translationsJsonInput.value),
+                customCss: customCssInput.value,
+                customJs: customJsInput.value,
+                navLinks: navLinks.slice()
+            };
+
+            if (!msg.text || !msg.text.trim()) {
+                throw new Error("Please enter a message.");
+            }
+
+            if (msg.mobileOnly && msg.desktopOnly) {
+                throw new Error("Cannot enable both Mobile only and Desktop only.");
+            }
+
+            return msg;
+        }
+
+        async function saveMessage() {
+            if (!currentBarId) {
+                await ensureCurrentBar();
+                if (!currentBarId) {
+                    alert("No bar selected.");
+                    return;
+                }
+            }
+            try {
+                const msg = collectMessagePayload();
+
+                const body = {
+                    text: msg.text,
+                    bg_color: msg.bgColor,
+                    text_color: msg.textColor,
+                    font_family: msg.fontFamily,
+                    custom_font_url: msg.customFontData || null,
+                    font_size: msg.fontSize,
+                    letter_spacing: msg.letterSpacing.toString(),
+                    text_align: msg.textAlign,
+                    padding_vertical: msg.paddingVertical,
+                    flash_enabled: msg.flashEnabled,
+                    marquee_enabled: msg.marqueeEnabled,
+                    button_text: msg.buttonText || null,
+                    button_url: msg.buttonUrl || null,
+                    button_bg_color: msg.buttonBg || null,
+                    button_text_color: msg.buttonTextColor || null,
+                    bar_position: msg.barPosition,
+                    sticky_enabled: msg.stickyEnabled,
+                    close_button_enabled: msg.closeButtonEnabled,
+                    mobile_only: msg.mobileOnly,
+                    desktop_only: msg.desktopOnly,
+                    page_targeting_enabled: msg.pageTargetingEnabled,
+                    page_targeting_type: msg.pageTargetingType,
+                    target_url: msg.targetUrl || null,
+                    countdown_enabled: msg.countdownEnabled,
+                    countdown_date: msg.countdownDate || null,
+                    countdown_text: msg.countdownText || null,
+                    ab_testing_enabled: msg.abTestingEnabled,
+                    ab_variant_text: msg.abVariantText || null,
+                    ab_variant_button: msg.abVariantButton || null,
+                    ab_traffic_split: msg.abTrafficSplit,
+                    geo_targeting_enabled: msg.geoTargetingEnabled,
+                    target_countries: msg.targetCountries,
+                    background_image_enabled: msg.backgroundImageEnabled,
+                    background_image_url: msg.backgroundImageData || null,
+                    background_opacity: msg.backgroundOpacity,
+                    background_position: msg.backgroundPosition,
+                    translations_enabled: msg.translationsEnabled,
+                    translations: msg.translations,
+                    custom_css: msg.customCss || null,
+                    custom_js: msg.customJs || null,
+                    start_date: msg.startDate || null,
+                    end_date: msg.endDate || null,
+                    nav_links: msg.navLinks
+                };
+
+                await apiRequest("/bars/" + currentBarId + "/messages", {
+                    method: "POST",
+                    body: JSON.stringify(body)
+                });
+
+                alert("Message saved successfully!");
+                await loadMessagesForCurrentBar();
+            } catch (err) {
+                alert(err.message || "Failed to save message");
+            }
+        }
+        // Emoji picker functionality
+        const emojiPickerBtn = document.getElementById("emoji-picker-btn");
+        const emojiPicker = document.getElementById("emoji-picker");
+        const emojiTabs = document.querySelectorAll(".emoji-tab");
+        const emojiTabContents = document.querySelectorAll(".emoji-tab-content");
+
+        emojiPickerBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            emojiPicker.classList.toggle("hidden");
+        });
+
+        // Close picker when clicking outside
+        document.addEventListener("click", (e) => {
+            if (!emojiPicker.contains(e.target) && e.target !== emojiPickerBtn) {
+                emojiPicker.classList.add("hidden");
+            }
+        });
+
+        // Tab switching
+        emojiTabs.forEach(tab => {
+            tab.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Update active tab
+                emojiTabs.forEach(t => t.classList.remove("active"));
+                tab.classList.add("active");
+
+                // Show corresponding content
+                const tabName = tab.dataset.tab;
+                emojiTabContents.forEach(content => {
+                    if (content.id === tabName + "-tab") {
+                        content.classList.remove("hidden");
+                    } else {
+                        content.classList.add("hidden");
+                    }
+                });
+            });
+        });
+
+        // Insert emoji/icon on click
+        document.querySelectorAll(".emoji-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const emoji = btn.dataset.emoji;
+                const textarea = messageTextInput;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const text = textarea.value;
+                textarea.value = text.substring(0, start) + emoji + text.substring(end);
+                textarea.selectionStart = textarea.selectionEnd = start + emoji.length;
+                textarea.focus();
+                updatePreview();
+                emojiPicker.classList.add("hidden");
+            });
+        });
+
+        // Nav links handling
+        function renderNavLinks() {
+            navLinksListEl.innerHTML = "";
+            if (!navLinks.length) {
+                navLinksListEl.innerHTML =
+                    '<p class="helper-text">No nav links yet. Add links to collections, help pages, etc.</p>';
+                return;
+            }
+
+            navLinks.forEach((link, index) => {
+                const row = document.createElement("div");
+                row.className = "nav-links-row";
+
+                const labelInput = document.createElement("input");
+                labelInput.type = "text";
+                labelInput.value = link.label || "";
+                labelInput.placeholder = "Label (e.g. Shop, FAQ)";
+                labelInput.addEventListener("input", () => {
+                    navLinks[index].label = labelInput.value;
+                });
+
+                const urlInput = document.createElement("input");
+                urlInput.type = "text";
+                urlInput.value = link.url || "";
+                urlInput.placeholder = "URL (e.g. /collections/sale)";
+                urlInput.addEventListener("input", () => {
+                    navLinks[index].url = urlInput.value;
+                });
+
+                const removeBtn = document.createElement("button");
+                removeBtn.type = "button";
+                removeBtn.className = "btn-ghost";
+                removeBtn.textContent = "✕";
+                removeBtn.addEventListener("click", () => {
+                    navLinks.splice(index, 1);
+                    renderNavLinks();
+                });
+
+                row.appendChild(labelInput);
+                row.appendChild(urlInput);
+                row.appendChild(removeBtn);
+                navLinksListEl.appendChild(row);
+            });
+        }
+
+        addNavLinkBtn.addEventListener("click", () => {
+            navLinks.push({ label: "", url: "" });
+            renderNavLinks();
+        });
+        async function loadAnalytics() {
+            if (!currentBarId) return;
+            try {
+                const data = await apiRequest(`/bars/${currentBarId}/analytics`, { method: "GET" });
+                totalImpressionsEl.textContent = (data.impressions || 0).toLocaleString();
+                totalClicksEl.textContent = (data.clicks || 0).toLocaleString();
+                const ctr = data.impressions > 0 ? ((data.clicks / data.impressions) * 100).toFixed(1) : "0.0";
+                ctrRateEl.textContent = ctr + "%";
+                const closeRate = data.impressions > 0 ? ((data.closes / data.impressions) * 100).toFixed(1) : "0.0";
+                closeRateEl.textContent = closeRate + "%";
+            } catch (err) {
+                console.error("Failed to load analytics:", err);
+            }
+        }
+
+        refreshAnalyticsBtn.addEventListener("click", loadAnalytics);
+        const templates = {
+            sale: {
+                text: "🔥 FLASH SALE: 50% OFF Everything! Use code FLASH50",
+                bgColor: "#dc2626",
+                textColor: "#ffffff",
+                buttonText: "Shop Now",
+                buttonBg: "#ffffff",
+                buttonTextColor: "#dc2626"
+            },
+            shipping: {
+                text: "✨ Free Shipping on Orders Over $50!",
+                bgColor: "#059669",
+                textColor: "#ffffff",
+                buttonText: "Start Shopping",
+                buttonBg: "#ffffff",
+                buttonTextColor: "#059669"
+            },
+            announcement: {
+                text: "📣 New Collection Launching This Friday!",
+                bgColor: "#667eea",
+                textColor: "#ffffff",
+                buttonText: "Learn More",
+                buttonBg: "#ffffff",
+                buttonTextColor: "#667eea"
+            },
+            holiday: {
+                text: "🎄 Holiday Sale: Up to 40% Off Sitewide",
+                bgColor: "#b91c1c",
+                textColor: "#ffffff",
+                buttonText: "Shop Gifts",
+                buttonBg: "#ffffff",
+                buttonTextColor: "#b91c1c"
+            }
+        };
+
+        document.querySelectorAll(".template-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const t = templates[btn.dataset.template];
+                messageTextInput.value = t.text;
+                bgColorInput.value = t.bgColor;
+                textColorInput.value = t.textColor;
+                buttonTextInput.value = t.buttonText;
+                buttonBgInput.value = t.buttonBg;
+                buttonTextColorInput.value = t.buttonTextColor;
+                updatePreview();
+            });
+        });
+
+        // =========================
+        // BOOTSTRAP WITHOUT LOGIN
+        // =========================
+
+        (async function bootstrap() {
+            // Always skip auth in this dev version
+            hide(loginScreen);
+            hide(registerScreen);
+            show(dashboard);
+
+            try {
+                await initializeDashboard();
+            } catch (err) {
+                console.error("Error initializing dashboard:", err);
+            }
+        })();
+
+
+        // Initial preview render
+        updatePreview();
+        renderNavLinks();
+    </script>
+
+</body>
+
+</html>
