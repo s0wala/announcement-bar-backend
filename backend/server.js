@@ -12,6 +12,9 @@ const app = express();
 app.use(express.static('public'));
 const PORT = process.env.PORT || 5000;
 
+// Stripe webhook needs raw body - must be before express.json()
+app.use('/webhooks/stripe', express.raw({ type: 'application/json' }), require('./routes/webhooks'));
+
 // Middleware
 app.use(helmet({
     contentSecurityPolicy: {
@@ -59,6 +62,7 @@ app.use('/api/analytics', require('./routes/analytics'));
 app.use('/auth/shopify', require('./routes/shopify-auth'));
 app.use('/widget', require('./routes/widget'));
 app.use('/api/public', require('./routes/public-api'));
+app.use('/api/billing', require('./routes/billing'));
 
 // Health check
 app.get('/health', (req, res) => {

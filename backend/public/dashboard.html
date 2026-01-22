@@ -63,6 +63,25 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
 .btn-primary { background: #667eea; color: white; }
 .btn-danger { background: #dc2626; color: white; }
+.btn-success { background: #10b981; color: white; }
+
+.plan-banner {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #f59e0b;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.plan-banner.pro { background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%); border-color: #8b5cf6; }
+.plan-info { font-weight: 600; }
+.plan-info span { font-size: 12px; color: #666; font-weight: normal; }
+.upgrade-buttons { display: flex; gap: 10px; }
+.upgrade-btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
+.upgrade-btn.basic { background: #f59e0b; color: white; }
+.upgrade-btn.pro { background: #8b5cf6; color: white; }
 
 .form-group { margin-bottom: 20px; }
 .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
@@ -120,6 +139,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
         <div class="dash-header">
             <h1>Everything Bar Dashboard</h1>
             <button class="btn" onclick="logout()" style="background: rgba(255,255,255,0.2);">Logout</button>
+        </div>
+
+        <!-- Plan/Upgrade Banner -->
+        <div id="plan-banner" class="plan-banner">
+            <div class="plan-info">
+                📦 Current Plan: <strong id="current-plan">Free</strong>
+                <span id="plan-limit">(1 announcement bar)</span>
+            </div>
+            <div class="upgrade-buttons" id="upgrade-buttons">
+                <button class="upgrade-btn basic" onclick="upgradePlan('basic')">Upgrade to Basic - $19/mo</button>
+                <button class="upgrade-btn pro" onclick="upgradePlan('pro')">Upgrade to Pro - $49/mo</button>
+            </div>
         </div>
 
         <div class="form-group">
@@ -189,6 +220,7 @@ async function showDashboard() {
     document.querySelectorAll('.auth-screen').forEach(el => el.classList.add('hidden'));
     document.getElementById('dashboard-screen').classList.remove('hidden');
     await loadBars();
+    await loadPlanInfo();
 }
 
 // Login
@@ -349,6 +381,78 @@ function getWidgetCode() {
     const code = `<script src="https://announcement-bar-api.onrender.com/widget/${currentBarId}.js" async></script>`;
     navigator.clipboard.writeText(code);
     alert('Widget code copied!\n\n' + code);
+}
+
+// Plan/Billing functions
+async function loadPlanInfo() {
+    try {
+        const res = await fetch(`${API_URL}/billing/subscription`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            updatePlanDisplay(data.plan);
+        }
+    } catch (err) {
+        console.log('Could not load plan info');
+    }
+}
+
+function updatePlanDisplay(plan) {
+    const planEl = document.getElementById('current-plan');
+    const limitEl = document.getElementById('plan-limit');
+    const buttonsEl = document.getElementById('upgrade-buttons');
+    const bannerEl = document.getElementById('plan-banner');
+
+    const planInfo = {
+        free: { name: 'Free', limit: '1 announcement bar', showUpgrade: true },
+        basic: { name: 'Basic', limit: '5 announcement bars', showUpgrade: true },
+        pro: { name: 'Pro', limit: 'Unlimited bars', showUpgrade: false }
+    };
+
+    const info = planInfo[plan] || planInfo.free;
+    planEl.textContent = info.name;
+    limitEl.textContent = `(${info.limit})`;
+
+    if (plan === 'pro') {
+        bannerEl.classList.add('pro');
+        buttonsEl.innerHTML = '<span style="color: #7c3aed; font-weight: 600;">✓ You have the best plan!</span>';
+    } else if (plan === 'basic') {
+        buttonsEl.innerHTML = '<button class="upgrade-btn pro" onclick="upgradePlan(\'pro\')">Upgrade to Pro - $49/mo</button>';
+    }
+}
+
+async function upgradePlan(plan) {
+    try {
+        const res = await fetch(`${API_URL}/billing/create-checkout-session`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ plan })
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            window.location.href = data.url;
+        } else {
+            alert('Failed to start checkout. Please try again.');
+        }
+    } catch (err) {
+        alert('Error connecting to payment system.');
+    }
+}
+
+// Check for success/cancel from Stripe redirect
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('success') === 'true') {
+    alert('🎉 Payment successful! Your plan has been upgraded.');
+    window.history.replaceState({}, '', window.location.pathname);
+}
+if (urlParams.get('canceled') === 'true') {
+    alert('Payment was canceled. No charges were made.');
+    window.history.replaceState({}, '', window.location.pathname);
 }
 </script>
 </body>
